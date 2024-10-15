@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from 'react';
-// import { FormBuilder } from '@/components/formbuilder/FormBuilder';
-// import { FormName } from '@/components/formbuilder/FormName';
-// import { Preview } from '@/components/formbuilder/Preview';
+ import { FormBuilder } from '@/components/formbuilder/FormBuilder';
+ import { FormName } from '@/components/formbuilder/FormName';
+ import { Preview } from '@/components/formbuilder/Preview';
 import AddProject from '@/components/addproject/addproject';
 import { Card, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
