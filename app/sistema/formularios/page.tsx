@@ -93,7 +93,7 @@ export default function Forms() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const data = await getForms();
+            const data = getForms();
             setForms(data);
         };
 
