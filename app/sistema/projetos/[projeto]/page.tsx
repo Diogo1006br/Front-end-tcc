@@ -1,28 +1,13 @@
 "use client";
-import Image from "next/image";
+
 import Link from "next/link";
-import { Label } from "@/components/ui/label";
-import { InputTags } from "@/components/ui/inputTag";
-import {
-  BellRing,
-  Check,
-  FolderOpenDot,
-  ChevronRight,
-  SearchCheck,
-  Info,
-  Plus,
-  ListTodo,
-  CalendarDays,
-  Filter,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import ProjectCardInfo from "@/components/projects/ProjectCardInfo";
+
+
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -30,7 +15,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -77,21 +61,24 @@ import {
   ToastClose,
 } from "@/components/ui/toast";
 
-import { EditName } from '@/components/ui/EditName';
-
 interface Props {
   params: { projeto: string };
 }
 
+interface Project {
+  projectName: string;
+  projectDescription: string;
+}
+
 export default function Projects({ params }: Props) {
   const [assets, setAssets] = useState([]);
-  const [project, setProject] = useState([]);
+  const [project, setProject] = useState<Project>({ projectName: "", projectDescription: "" });
   const [assetNumbers, setAssetNumbers] = useState([]);
   const [forms, setForms] = useState([]);
   const [assetHasChanged, setAssetHasChanged] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [toastContent, setToastContent] = useState({ title: "", description: "", variant: "default" });
-  const sheetRef = useRef(null);
+  const [toastContent, setToastContent] = useState<{ title: string; description: string; variant: "default" | "destructive" | null | undefined }>({ title: "", description: "", variant: "default" });
+  const sheetRef = useRef<HTMLButtonElement>(null);
 
   const [NewAssetFormData, setNewAssetFormData] = useState({
     assetName: "",
@@ -104,7 +91,7 @@ export default function Projects({ params }: Props) {
     setHasChanged: setAssetHasChanged,
   });
 
-  const handleAddAsset = async (e) => {
+  const handleAddAsset = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!NewAssetFormData.assetName || !NewAssetFormData.form) {
@@ -131,13 +118,13 @@ export default function Projects({ params }: Props) {
     }
   };
 
-  const handleSelectForm = (value) => {
+  const handleSelectForm = (value: string) => {
     setNewAssetFormData({ ...NewAssetFormData, form: value });
     console.log(value);
   };
 
+  // Incluindo params.projeto na lista de dependências do useEffect
   useEffect(() => {
-    // Para fazer uma solicitação GET
     api
       .get(`assets/`, {
         params: {
@@ -150,10 +137,10 @@ export default function Projects({ params }: Props) {
       .catch((error) => {
         console.error(error);
       });
-  }, [assetHasChanged]);
+  }, [assetHasChanged, params.projeto]);
 
+  // Incluindo params.projeto na lista de dependências do useEffect
   useEffect(() => {
-    // Para fazer uma solicitação GET
     api
       .get(`projects/${params.projeto}`)
       .then((response) => {
@@ -165,8 +152,8 @@ export default function Projects({ params }: Props) {
       });
   }, [params.projeto]);
 
+  // Incluindo params.projeto na lista de dependências do useEffect
   useEffect(() => {
-    // Para fazer uma solicitação GET
     api
       .get(`asset_numbers/${params.projeto}/`)
       .then((response) => {
@@ -179,7 +166,6 @@ export default function Projects({ params }: Props) {
   }, [assetHasChanged, params.projeto]);
 
   useEffect(() => {
-    // Para fazer uma solicitação GET
     api
       .get(`forms/`)
       .then((response) => {
@@ -200,12 +186,11 @@ export default function Projects({ params }: Props) {
       ? assets.filter((item: any) => item.status === "Arquivado")
       : [];
 
-      const [isOverlayActive, setOverlayActive] = useState(false);
+  const [isOverlayActive, setOverlayActive] = useState(false);
 
-  const toggleOverlay = (active) => {
+  const toggleOverlay = (active: boolean) => {
     setOverlayActive(active);
   };
-
 
   return (
     <div className="flex min-h-screen w-full flex-col sm:gap-4 sm:py-4 sm:pl-6 sm:pr-6">
@@ -225,8 +210,7 @@ export default function Projects({ params }: Props) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-              </BreadcrumbLink>
+              <BreadcrumbLink asChild></BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -239,22 +223,21 @@ export default function Projects({ params }: Props) {
               <div className="basis-2/3">
                 <CardHeader>
                   <CardTitle>{project.projectName}</CardTitle>
-                  <CardDescription>
-                     {project.projectDescription}
-                  </CardDescription>
+                  <CardDescription>{project.projectDescription}</CardDescription>
                 </CardHeader>
               </div>
               <div className="flex basis-1/3 justify-end mr-8">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button className="mb-2 mr-8" ref={sheetRef}>Novo Item</Button>
+                    <Button className="mb-2 mr-8" ref={sheetRef}>
+                      Novo Item
+                    </Button>
                   </SheetTrigger>
                   <SheetContent>
                     <SheetHeader>
                       <SheetTitle>Criar novo item</SheetTitle>
                       <SheetDescription>
-                        Crie seu novo item preenchendo um nome e escolhendo um
-                        formulário
+                        Crie seu novo item preenchendo um nome e escolhendo um formulário
                       </SheetDescription>
                     </SheetHeader>
                     <div className="grid gap-4 py-4">
@@ -273,7 +256,7 @@ export default function Projects({ params }: Props) {
                         />
                         <Select onValueChange={handleSelectForm}>
                           <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select um item" />
+                            <SelectValue placeholder="Selecione um item" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
@@ -289,7 +272,9 @@ export default function Projects({ params }: Props) {
                       </div>
                     </div>
 
-                    <Button onClick={handleAddAsset}>Adicionar Item</Button>
+                    <form onSubmit={handleAddAsset}>
+                      <Button type="submit">Adicionar Item</Button>
+                    </form>
                     <SheetFooter>
                       <SheetClose asChild> </SheetClose>
                     </SheetFooter>
@@ -298,9 +283,7 @@ export default function Projects({ params }: Props) {
               </div>
             </div>
           </Card>
-          <div className="flex rounded mt-4">
-            {/* <p>{assetNumbers}</p> */}
-          </div>
+          <div className="flex rounded mt-4"></div>
           <Tabs defaultValue="all">
             <div className="flex items-center dark:ml-6">
               <TabsList>
@@ -323,9 +306,7 @@ export default function Projects({ params }: Props) {
             <TabsContent value="active">
               <Card x-chunk="dashboard-06-chunk-0" className="relative">
                 <CardContent className="overflow-auto h-[500px]">
-
                   <div className="container mx-auto py-14 ">
-
                     <DataTable columns={columns} data={assetStatusActive} />
                   </div>
                 </CardContent>
@@ -334,10 +315,8 @@ export default function Projects({ params }: Props) {
             <TabsContent value="archived">
               <Card x-chunk="dashboard-06-chunk-0" className="relative">
                 <CardContent className="overflow-auto h-[500px]">
-
                   <div className="container mx-auto py-14 ">
-                   <DataTable columns={columns} data={assetStatusArchived} />
-
+                    <DataTable columns={columns} data={assetStatusArchived} />
                   </div>
                 </CardContent>
               </Card>
@@ -346,10 +325,7 @@ export default function Projects({ params }: Props) {
 
           <ToastViewport />
           {showToast && (
-            <Toast
-              onOpenChange={setShowToast}
-              variant={toastContent.variant}
-            >
+            <Toast onOpenChange={setShowToast} variant={toastContent.variant}>
               <ToastTitle>{toastContent.title}</ToastTitle>
               <ToastDescription>{toastContent.description}</ToastDescription>
               <ToastClose />

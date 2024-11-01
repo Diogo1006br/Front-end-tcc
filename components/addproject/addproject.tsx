@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
- // Ajuste o caminho de importação conforme necessário
+import api from '@/Modules/Auth'; // Ajuste o caminho de importação conforme necessário
 
 import {
   Sheet,
@@ -26,7 +26,7 @@ import { set } from 'date-fns';
 
 
 export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (value: boolean) => void, hasChanged: boolean}) {
-  const [emailSuggestions, setEmailSuggestions] = useState([]);
+  const [emailSuggestions, setEmailSuggestions] = useState<{ results: { email: string }[] } | null>(null);
 
   const [NewProjectFormData, setNewProjectFormData] = useState({
     projectName: '',
@@ -56,10 +56,10 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     const normalizedInput = inputValue.trim().toLowerCase();
     if (!normalizedInput) return [];
     // Assume que emailSuggestions é um objeto com uma propriedade results que é um array
-    const suggestionsArray = emailSuggestions.results || [];
-    return suggestionsArray.filter(email =>
-      email.email.toLowerCase().includes(normalizedInput)
-    );
+    const suggestionsArray = emailSuggestions?.results || [];
+    return suggestionsArray
+      .filter(email => email.email.toLowerCase().includes(normalizedInput))
+      .map(email => email.email);
   };
 
   const validateEmail = (email: string) => {
@@ -84,7 +84,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     }
 
     // Verifica se emailSuggestions está vazio antes de usar map
-    const suggestedEmails = emailSuggestions.length > 0 ? emailSuggestions.map(email => email.email.toLowerCase()) : [];
+    const suggestedEmails = emailSuggestions && emailSuggestions.results.length > 0 ? emailSuggestions.results.map(email => email.email.toLowerCase()) : [];
 
     if (value && suggestedEmails.includes(value.toLowerCase())) {
       setNewProjectFormData(prev => ({
@@ -139,7 +139,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
         setToastMessage({ title: 'Erro', description: 'Formato de email inválido.', variant: 'destructive' });
         return;
       }
-      const suggestedEmails = emailSuggestions.length > 0 ? emailSuggestions.map(email => email.email.toLowerCase()) : [];
+      const suggestedEmails = emailSuggestions && emailSuggestions.results.length > 0 ? emailSuggestions.results.map(email => email.email.toLowerCase()) : [];
       if (value && suggestedEmails.includes(value.toLowerCase())) {
         setNewProjectFormData(prev => ({
           ...prev,
@@ -191,14 +191,12 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
   };
 
   return (
-    <ToastProvider >
+    <ToastProvider>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button className="mb-2 mr-8 ">
-            Novo Projeto
-          </Button>
+          <Button className="mb-2 mr-8">Novo Projeto</Button>
         </SheetTrigger>
-        <SheetContent className="bg-darkBackground">
+        <SheetContent className="bg-white text-black dark:text-white">
           <form onSubmit={handleAddProject}>
             <SheetHeader>
               <SheetTitle>Criar novo projeto</SheetTitle>
@@ -207,8 +205,8 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
               </SheetDescription>
             </SheetHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4 ">
-                <Label htmlFor="name" className="text-right">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right text-black dark:text-white">
                   Projeto
                 </Label>
                 <Input
@@ -216,11 +214,11 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
                   value={NewProjectFormData.projectName}
                   onChange={(e) => setNewProjectFormData({ ...NewProjectFormData, projectName: e.target.value })}
                   placeholder="Nome do Projeto"
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-200 text-black"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
+                <Label htmlFor="username" className="text-right text-black dark:text-white">
                   Descrição
                 </Label>
                 <Input
@@ -228,11 +226,11 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
                   value={NewProjectFormData.projectDescription}
                   onChange={(e) => setNewProjectFormData({ ...NewProjectFormData, projectDescription: e.target.value })}
                   placeholder="Descrição do Projeto"
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-200 text-black"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="members" className="text-right">
+                <Label htmlFor="members" className="text-right text-black dark:text-white">
                   Membros
                 </Label>
                 <div className="col-span-3">
@@ -242,15 +240,16 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     placeholder="Adicione email dos membros"
+                    className="bg-gray-200 text-black"
                   />
                   <div>
                     {suggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        onClick={() => handleSuggestionClick(suggestion.email)}
-                        className="cursor-pointer hover:bg-gray-200"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="cursor-pointer hover:bg-gray-300"
                       >
-                        {suggestion.email}
+                        {suggestion}
                       </div>
                     ))}
                   </div>
@@ -274,7 +273,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="image" className="text-right">
+                <Label htmlFor="image" className="text-right text-blackdark:text-white">
                   Imagem
                 </Label>
                 <Input
@@ -286,7 +285,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
                     }
                   }}
                   placeholder="Descrição do Projeto"
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-200 text-black"
                 />
               </div>
             </div>

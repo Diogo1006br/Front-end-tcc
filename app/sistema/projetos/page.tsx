@@ -4,7 +4,6 @@
 import api from "@/Modules/Auth"
 import { useState, useEffect } from 'react';
 
-
 //Imports Components
 import Link from "next/link"
 import { Input } from "@/components/ui/input"

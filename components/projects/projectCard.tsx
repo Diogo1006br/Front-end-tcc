@@ -21,9 +21,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import Image from 'next/image'; // Importando o componente Image
+
 interface ProjectCardProps {
   // Defina as propriedades do componente aqui
-  project_id: number;
+//   project_id: number;
   project_name: string;
   project_description: string;
   project_image: string;
@@ -47,7 +49,14 @@ const ProjectCard: React.FC<ProjectCardProps> = (props) => {
       <Card className='shadow-lg mr-6 mt-4 max-h-32 min-h-24 min-w-64 hover:bg-zinc-100'>
           <div className='flex'>
                 <div className='w-28 h-24 flex-shrink-0 items-center justify-center'>
-                    <img className="w-full h-full object-cover" src={project_image} alt="Descrição da imagem" />
+                    {/* Substitua <img> por <Image> */}
+                    <Image
+                        className="w-full h-full object-cover"
+                        src={project_image}
+                        alt="Descrição da imagem"
+                        width={112} // Defina a largura desejada
+                        height={96}  // Defina a altura desejada
+                    />
                 </div>
                 <div className='flex-grow flex flex-col justify-between'>
                     <div className='flex flex-col justify-between items-start h-full'>

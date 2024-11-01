@@ -208,7 +208,7 @@ export default function Forms() {
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
-                                            className="w-64"
+                                            className="w-full"
                                             placeholder="Buscar Formulários"
                                             onChange={(e) => setSearchTermAll(e.target.value)}
                                         />
@@ -225,7 +225,7 @@ export default function Forms() {
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
-                                            className="w-64"
+                                            className=" w-full"
                                             placeholder="Buscar Formulários"
                                             onChange={(e) => setSearchTermActive(e.target.value)}
                                         />
@@ -242,7 +242,7 @@ export default function Forms() {
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
-                                            className="w-64"
+                                            className="w-full"
                                             placeholder="Buscar Formulários"
                                             onChange={(e) => setSearchTermArchived(e.target.value)}
                                         />

@@ -60,75 +60,147 @@ import {
   ToastClose,
 } from "@/components/ui/toast"; // Importando os componentes de toast
 
-import Image from "next/image"
+import Image from "next/image";
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import AddElement from '@/components/formbuilder/AddElement';
+import { Label } from '@/components/ui/label';
 
 //Interface
 interface Props {
-  params: { ativo: string }
+  params: { ativo: string };
+}
+
+interface FormField {
+  key: string;
+  label: string;
+  id: string; // Adicione o campo 'id' se ele estiver presente
 }
 
 interface Asset {
+  id: string;
   assetName: string;
-  form: string;
+  form: { [key: string]: FormField };
   project: string;
 }
 
-export default function Asset({ params }: Props) {
 
-  //Variables
+const ActionCell: React.FC<{ row: any }> = ({ row }) => {
+  const TableContent = row.original;
+  const [value, setValue] = useState('');
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null);
+
+  const handleEdit = () => {
+    setIsSheetOpen(true); // Abre o Sheet ao clicar em Editar
+  };
+
+  const handleSave = () => {
+    console.log("Actions", TableContent);
+    
+    api.put(`/actions/${TableContent.id}/`, TableContent, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+      .then((response) => {
+        console.log(response.data);
+        if (response.status === 200) {
+          setToastMessage({ title: 'Sucesso', description: 'Ação salva com sucesso.', variant: 'default' });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        setToastMessage({ title: 'Erro', description: 'Falha ao salvar a ação. Tente novamente.', variant: 'destructive' });
+      });
+  };
+
+  return (
+    <>
+      <ToastProvider>
+        <Button variant="ghost" onClick={handleEdit}>
+          Editar
+        </Button>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent className="w-full max-w-2xl p-6 mx-auto rounded-lg shadow-lg overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Editar Ação</SheetTitle>
+            </SheetHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Título</Label>
+                <Input
+                  value={TableContent.title}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder="Digite o título da ação"
+                />
+              </div>
+              {/* Outros campos de edição podem ser adicionados aqui */}
+
+              <SheetFooter className="flex justify-end">
+                <Button variant="outline" onClick={() => setIsSheetOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave}>Salvar</Button>
+              </SheetFooter>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {toastMessage && (
+          <Toast className={toastMessage.variant === 'destructive' ? 'bg-red-600' : 'bg-green-600'}>
+            <ToastTitle>{toastMessage.title}</ToastTitle>
+            <ToastDescription>{toastMessage.description}</ToastDescription>
+            <ToastClose />
+          </Toast>
+        )}
+
+        <ToastViewport />
+      </ToastProvider>
+    </>
+  );
+};
+
+export default function Asset({ params }: Props ,) {
+  // Variables
   const [asset, setAsset] = useState<Asset>();
   const [elements, setElements] = useState([]);
   const [forms, setForms] = useState([]);
-  const [form,setForm] = useState([]);
-  const [NewElementFormData, setNewElementFormData] = useState({
-    elementName: '',
-    form: '',
-    ativo: params.ativo[0],
-  });
-  const [haschanged, setHasChanged] = useState(false);
+  const [form, setForm] = useState<Asset | null>(null);
+  const [hasChanged, setHasChanged] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastContent, setToastContent] = useState({
     title: '',
     description: '',
-    variant: 'default', // Ou outro valor padrão que você quiser
+    variant: 'default',
   });
 
-  const [showMore, setShowMore] = useState(false); // Estado para controlar a abertura do modal
+  const [showMore, setShowMore] = useState(false);
   const toggleShowMore = () => {
     setShowMore(!showMore);
-  }
-
-  const [isSheetOpen, setIsSheetOpen] = useState(false); // Estado para controlar a abertura do Sheet
-
-  const handleSelectForm = (value) => {
-    setNewElementFormData({ ...NewElementFormData, form: value });
   };
 
-  const elementsStatusActive = elements.filter((item: any) => item.status === "Ativo");
-  const elementsStatusArchived = elements.filter((item: any) => item.status === "Arquivado");
-
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [hasChangedImage, setHasChangedImage] = useState(false);
 
-  //Hooks
+  // Hooks
   useEffect(() => {
     api.get(`assets/${params.ativo[0]}`)
       .then(response => {
         setAsset(response.data);
         api.get(`forms/${response.data.form}`)
-        .then(response => {
-          setForm(response.data);
-          console.log("FORMS", response.data.form)
-        })
-        .catch(error => {
-          console.error(error);
-        })
+          .then(response => {
+            setForm(response.data);
+            console.log("FORMS", response.data.form);
+          })
+          .catch(error => {
+            console.error(error);
+          });
       })
       .catch(error => {
         console.error(error);
       });
-  }, [params.ativo]); // Adicionando params.ativo como dependência
+  }, [params.ativo]);
 
   useEffect(() => {
     api.get(`forms/`)
@@ -147,22 +219,17 @@ export default function Asset({ params }: Props) {
       }
     }).then(response => {
       setElements(response.data);
-    })
-    .catch(error => {
+    }).catch(error => {
       console.error(error);
     });
-  }, [params.ativo, haschanged]); // Adicionando params.ativo e haschanged como dependências
-
-  function print() {
-    console.log("FORMS", forms)
-  }
+  }, [params.ativo, hasChanged]);
 
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const fetchImages = async () => {
       if (form?.form) {
-        const newImageUrls:any = {};
+        const newImageUrls: any = {};
         for (const key of Object.keys(form.form)) {
           const item = form.form[key];
           try {
@@ -184,7 +251,7 @@ export default function Asset({ params }: Props) {
     };
 
     fetchImages();
-  }, [form, params.ativo , hasChangedImage]); // Adicionando params.ativo, form e hasChangedImage como dependências
+  }, [form, params.ativo, hasChangedImage]);
 
   return (
     <ToastProvider>
@@ -220,7 +287,6 @@ export default function Asset({ params }: Props) {
         </header>
 
         <main>
-          {/* Titulo da página */}
           <section>
             <Card className="relative">
               <div className="flex items-center justify-between p-4">
@@ -232,7 +298,6 @@ export default function Asset({ params }: Props) {
           </section>
 
           <section className='flex flex-row gap-4'>
-            {/* Conteudo do formulário do Ativo */}
             <section className='flex-col basis-3/5'>
               <Card>
                 <CardHeader>
@@ -240,9 +305,10 @@ export default function Asset({ params }: Props) {
                 </CardHeader>
                 <div className={`overflow-hidden ${showMore ? 'h-auto' : 'h-96'}`}>
                   <div className='p-4'>
-                  {asset?.form && (
-                    <Sender params={{ id: asset?.form, asset: params.ativo[0], instance: 'Asset' , setHasChangedImage:setHasChangedImage , hasChangedImage:hasChangedImage  }} />
-                  )}
+                    {asset?.form && (
+                      <Sender params={{  id: String((asset.form).id), asset: params.ativo[0], instance: 'Asset' }}
+                       />
+                    )}
                   </div>
                 </div>
                 <div className='flex flex-row items-center justify-center mt-4'>
@@ -250,91 +316,83 @@ export default function Asset({ params }: Props) {
                     className="flex flex-row items-center justify-center mt-4 hover:text-muted-foreground"
                     onClick={toggleShowMore}
                   >
-                    {showMore? <ChevronUp/> : <ChevronDown/>}
+                    {showMore ? <ChevronUp /> : <ChevronDown />}
                     {showMore ? 'Mostrar menos' : 'Mostrar mais'}
                   </button>
                 </div>
               </Card>
             </section>
 
-            {/* Mosaico das imagens linkadas nas perguntas do ativo */}
-            <section className="basis-2/5">  
-              <Card className="overflow-hidden" x-chunk="dashboard-07-chunk-4">
+            <section className="basis-2/5">
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Mosaico de fotos</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-4">
                     {form?.form && Object.keys(form.form).map((key) => {
-                        const item = form.form[key];
-                        const url = imageUrls[item.key];
-                        console.log("Image", imageUrls)
-                        if (url && url.startsWith("http")) {
-                          return (
-                          
-                            <div className='row-1 min-h-44 hover:min-h-96' key={key}>
-                              <img
-                                alt="Product image"
-                                className="aspect-square w-full rounded-md object-cover"
-                                width={300}
-                                height={300}
-                                src={url}
-                              />
-                              <div className="text-center">{item.label}</div>
-                            </div>
-                          
+                      const item = form.form[key];
+                      const url = imageUrls[item.key];
+                      if (url && url.startsWith("http")) {
+                        return (
+                          <div className='row-1 min-h-44 hover:min-h-96' key={key}>
+                            <Image
+                              alt="Product image"
+                              className="aspect-square w-full rounded-md object-cover"
+                              width={300}
+                              height={300}
+                              src={url}
+                            />
+                            <div className="text-center">{item.label}</div>
+                          </div>
                         );
                       }
                       return null;
                     })}
                   </div>
-                  
                 </CardContent>
               </Card>
             </section>
-
           </section>
 
-          {/* Tabela de elementos linkados no ativo */}
           <section>
-              <div className="flex flex-col gap-4 p-4">
-                <Tabs defaultValue="all">
-                  <TabsList className="p-2">
-                    <TabsTrigger value="all">Todos</TabsTrigger>
-                    <TabsTrigger value="active">Ativos</TabsTrigger>
-                    <TabsTrigger value="archived">Arquivados</TabsTrigger>
-                  </TabsList>
+            <div className="flex flex-col gap-4 p-4">
+              <Tabs defaultValue="all">
+                <TabsList className="p-2">
+                  <TabsTrigger value="all">Todos</TabsTrigger>
+                  <TabsTrigger value="active">Ativos</TabsTrigger>
+                  <TabsTrigger value="archived">Arquivados</TabsTrigger>
+                </TabsList>
 
-                  <AddElement forms={forms} />
+                <AddElement forms={forms} asset={asset?.id}  />
 
-                  <TabsContent value="all" className="p-4">
-                    <DataTable columns={columns} data={elements} />
-                  </TabsContent>
-                  <TabsContent value="active" className="p-4">
-                    <DataTable columns={columns} data={elementsStatusActive} />
-                  </TabsContent>
-                  <TabsContent value="archived" className="p-4">
-                    <DataTable columns={columns} data={elementsStatusArchived} />
-                  </TabsContent>
-                </Tabs>
-              </div> 
+                <TabsContent value="all" className="p-4">
+                  <DataTable columns={columns} data={elements} />
+                </TabsContent>
+                <TabsContent value="active" className="p-4">
+                  <DataTable columns={columns} data={elements.filter((item: any) => item.status === 'Ativo')} />
+                </TabsContent>
+                <TabsContent value="archived" className="p-4">
+                  <DataTable columns={columns} data={elements.filter((item: any) => item.status === 'Arquivado')} />
+                </TabsContent>
+              </Tabs>
+            </div>
           </section>
 
         </main>
 
         <ToastViewport />
-        {showToast && (
-          <Toast
-            onOpenChange={setShowToast}
-            variant={toastContent.variant}
-          >
-            <ToastTitle>{toastContent.title}</ToastTitle>
-            <ToastDescription>{toastContent.description}</ToastDescription>
-            <ToastClose />
-          </Toast>
-        )}
+        {showToast && toastContent.title && toastContent.description && (
+        <Toast
+          onOpenChange={(open) => setShowToast(open)}
+          variant={toastContent.variant === 'default' || toastContent.variant === 'destructive' ? toastContent.variant : 'default'} // Garante que o variant seja válido
+        >
+          <ToastTitle>{toastContent.title}</ToastTitle>
+          <ToastDescription>{toastContent.description}</ToastDescription>
+          <ToastClose />
+        </Toast>
+      )}
       </div>
-
     </ToastProvider>
   );
 }

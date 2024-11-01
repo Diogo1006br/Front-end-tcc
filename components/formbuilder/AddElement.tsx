@@ -29,7 +29,7 @@ import {
   } from "@/components/ui/select";
 
 interface AddElementProps {
-    elementData: any[];
+    forms: any[];
     asset: any;
 }
 interface NewElementFormData {
@@ -37,7 +37,7 @@ interface NewElementFormData {
     form: string;
     asset: string;
 }
-export default function AddElement({ elementData, asset }: AddElementProps) {
+export default function AddElement({ forms, asset }: AddElementProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [NewElementFormData, setNewElementFormData] = useState<NewElementFormData>({} as NewElementFormData);
     const [showToast, setShowToast] = useState(false);
@@ -54,7 +54,7 @@ export default function AddElement({ elementData, asset }: AddElementProps) {
       setNewElementFormData({ ...NewElementFormData, form: value });
     };
 
-    const handleSubmitElements = async (e) => {
+    const handleSubmitElements = async (e: React.FormEvent) => {
         e.preventDefault();
     
         if (!NewElementFormData.elementName || !NewElementFormData.form) {
@@ -128,14 +128,14 @@ export default function AddElement({ elementData, asset }: AddElementProps) {
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Formulários</SelectLabel>
-                                    {elementData && elementData.length > 0 ? (
-                                        elementData.map((form) => (
+                                    {forms && forms.length > 0 ? (
+                                        forms.map((form) => (
                                             <SelectItem key={form.id} value={form.id}>
                                                 {form.name}
                                             </SelectItem>
                                         ))
                                     ) : (
-                                        <SelectItem disabled>Nenhum formulário disponível</SelectItem>
+                                        <SelectItem value='1' disabled>Nenhum formulário disponível</SelectItem>
                                     )}
                                 </SelectGroup>
                             </SelectContent>

@@ -1,27 +1,16 @@
-// pages/empresa.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // Importar o seu componente de tabs
-import { Button } from "@/components/ui/button"; // Botão do shadcn
-import { Input } from "@/components/ui/input"; // Componente de input do shadcn
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select"; // Componentes de select do shadcn
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/newtable/data-table";
 import { columns } from "./columns"; 
 import api from "@/Modules/Auth";
-
-import { ToastProvider, Toast, ToastTitle, ToastDescription, ToastClose, ToastViewport } from "@/components/ui/toast"; // Import Toast components
-import { set } from "date-fns";
+import { ToastProvider, Toast, ToastTitle, ToastDescription, ToastClose, ToastViewport } from "@/components/ui/toast";
 
 interface Company {
   id: string;
@@ -33,41 +22,52 @@ interface Company {
   telephone: string;
   address: string;
   user_Data: string[];
-  user_email: string[]; // Update the type to string[]
-  logotipo?: File; // Add logotipo property
+  user_email: string[];
+  logotipo?: File;
+}
+
+interface User {
+  email: string;
+  firstName: string;
+  lastName: string;
+  companyPosition: string;
+  password: string;
+}
+
+interface EmailSuggestion {
+  email: string;
+}
+
+interface EmailSuggestionsResponse {
+  results: EmailSuggestion[];
 }
 
 export default function EmpresaPage() {
   const [company, setCompany] = useState<Company | undefined>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [value, setValue] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [emailSuggestions, setEmailSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<EmailSuggestion[]>([]);
+  const [emailSuggestions, setEmailSuggestions] = useState<EmailSuggestionsResponse>({ results: [] });
   const [toastMessage, setToastMessage] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [userPostData, setUserPostData] = useState<User | undefined>();
+  const [hasUserAdd, setHasUserAdd] = useState(false);
 
   useEffect(() => {
-    // Para fazer uma solicitação GET
-    api
-      .get(`companies/`)
+    api.get(`companies/`)
       .then((response) => {
         if (response.data.image) {
           fetchImageAndSetPostData(response.data.image, response.data);
         }
         setCompany(response.data);
-        console.log(response.data.results);
       })
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  }, [hasUserAdd]);
 
   useEffect(() => {
-    try {
-      api.get('users/').then(response => setEmailSuggestions(response.data));
-    } catch (error) {
-      console.error('Erro ao buscar sugestões de email:', error);
-    }
+    api.get('users/').then(response => setEmailSuggestions(response.data));
   }, []);
 
   useEffect(() => {
@@ -86,10 +86,10 @@ export default function EmpresaPage() {
       const fileName = imagePath.split('/').pop() || "profileImage.jpg";
       const file = new File([blob], fileName, { type: blob.type });
 
-      // Crie um objeto do tipo Projects e adicione a imagem
+      // Crie um objeto do tipo Company e adicione a imagem
       const updatedCompany: Company = {
         ...CompanyData,
-        Logotipo: file,
+        logotipo: file,
         user_email: CompanyData.user_email || [],
         companyName: CompanyData.companyName || '',
         comercialEmail: CompanyData.comercialEmail || '',
@@ -99,47 +99,16 @@ export default function EmpresaPage() {
         site: CompanyData.site || ''
       };
 
-      // Atualize o estado do projeto com os novos dados
+      // Atualize o estado da empresa com os novos dados
       setCompany(updatedCompany);
     } catch (error) {
       console.error("Erro ao buscar a imagem:", error);
     }
   }
 
-  const handleSave = () => {
-    console.log("Company", company)
-    api.put(`companies/${company?.id}/`, company, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-      .then((response) => {
-        console.log(response.data);
-        if (response.status === 200) {
-          setToastMessage({ title: 'Sucesso', description: 'Dados salvos com sucesso.', variant: 'default' });
-        } else {
-          setToastMessage({ title: 'Erro', description: 'Erro ao salvar os dados.', variant: 'destructive' });
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        setToastMessage({ title: 'Erro', description: 'Erro ao salvar os dados.', variant: 'destructive' });
-      });
-  };
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const url = URL.createObjectURL(file);
-      setCompany((currentComapany) => ({ ...currentComapany, logotipo: file }) as Company | undefined);
-      console.log(file);
-    }
-  };
-
   const getSuggestions = (inputValue: string) => {
     const normalizedInput = inputValue.trim().toLowerCase();
     if (!normalizedInput) return [];
-    // Assume que emailSuggestions é um objeto com uma propriedade results que é um array
     const suggestionsArray = emailSuggestions.results || [];
     return suggestionsArray.filter(email =>
       email.email.toLowerCase().includes(normalizedInput)
@@ -151,10 +120,42 @@ export default function EmpresaPage() {
     return re.test(email);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setValue(value);
-    setSuggestions(getSuggestions(value));
+  const handlePostUser = () => {
+    api.post('users/', userPostData)
+      .then((response) => {
+        if (response.status === 201) {
+          setToastMessage({ title: 'Sucesso', description: 'Usuário criado com sucesso.', variant: 'default' });
+          setHasUserAdd(!hasUserAdd);
+        } else {
+          setToastMessage({ title: 'Erro', description: 'Erro ao criar o usuário.', variant: 'destructive' });
+        }
+      })
+      .catch((error) => {
+        setToastMessage({ title: 'Erro', description: 'Erro ao criar o usuário.', variant: 'destructive' });
+      });
+  };
+
+  const handleSave = () => {
+    api.put(`companies/${company?.id}/`, company, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          setToastMessage({ title: 'Sucesso', description: 'Dados salvos com sucesso.', variant: 'default' });
+        } else {
+          setToastMessage({ title: 'Erro', description: 'Erro ao salvar os dados.', variant: 'destructive' });
+        }
+      })
+      .catch((error) => {
+        setToastMessage({ title: 'Erro', description: 'Erro ao salvar os dados.', variant: 'destructive' });
+      });
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setCompany((currentCompany) => ({ ...currentCompany, logotipo: file }) as Company | undefined);
+    }
   };
 
   const handleSuggestionClick = (email: string) => {
@@ -162,15 +163,14 @@ export default function EmpresaPage() {
       setToastMessage({ title: 'Erro', description: 'Membro já está no projeto.', variant: 'destructive' });
     } else {
       setCompany(prev => {
+        if (!prev) return prev;
         const updatedCompany = {
           ...prev,
           user_email: [...prev.user_email, email]
         };
-        console.log(updatedCompany.user_email); // Log após a atualização do estado
         return updatedCompany;
       });
       setValue('');
-      setSuggestions([]);
       setToastMessage({ title: 'Sucesso', description: 'Membro adicionado com sucesso.', variant: 'default' });
     }
   };
@@ -213,66 +213,76 @@ export default function EmpresaPage() {
           <div className="flex items-center">
             <div className="basis-2/3">
               <CardHeader>
-                <CardTitle>{company?.companyName}</CardTitle>
+                <CardTitle>{company?.companyName || 'Nome da Empresa Indisponível'}</CardTitle>
                 <CardDescription>Gerencie os dados da sua empresa</CardDescription>
               </CardHeader>
             </div>
-            <div className="flex basis-1/3 justify-end mr-8">
+            <div className="flex basis-1/3 justify-end">
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline">+ Adicionar Membro</Button>
+                  <Button variant="outline">Adicionar Membro</Button>
                 </SheetTrigger>
                 <SheetContent>
                   <SheetHeader>
                     <SheetTitle>Adicionar Membro</SheetTitle>
                   </SheetHeader>
                   <div className="p-4">
-                    <div className="col-span-3">
-                      <Input
-                        type="text"
-                        value={value}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Adicione email dos membros"
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Email</label>
+                      <Input 
+                        type="text" 
+                        placeholder="Digite o email do membro" 
+                        value={userPostData?.email || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setUserPostData((currentUser) => ({ ...currentUser, email: newValue }) as User | undefined);
+                        }}
                       />
-                      <div>
-                        {suggestions.map((suggestion, index) => (
-                          <div
-                            key={index}
-                            onClick={() => handleSuggestionClick(suggestion.email)}
-                            className="cursor-pointer hover:bg-gray-200"
-                          >
-                            {suggestion.email}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-2 flex flex-wrap">
-                        {company?.user_email && company?.user_email.length > 0 && (
-                          company?.user_email.map((member: string, index: number) => (
-                            <span
-                              key={index}
-                              className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                            >
-                              {member}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveMember(member)}
-                                className="ml-2 text-red-500"
-                              >
-                                &times;
-                              </button>
-                            </span>
-                          ))
-                        )}
-                      </div>
+                      <label className="block text-sm font-medium text-gray-700">Primeiro Nome</label>
+                      <Input 
+                        type="text" 
+                        placeholder="Digite o primeiro nome do membro"
+                        value={userPostData?.firstName || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setUserPostData((currentUser) => ({ ...currentUser, firstName: newValue }) as User | undefined);
+                        }}
+                      />
+                      <label className="block text-sm font-medium text-gray-700">Sobrenome</label>
+                      <Input 
+                        type="text" 
+                        placeholder="Digite o sobrenome do membro"
+                        value={userPostData?.lastName || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setUserPostData((currentUser) => ({ ...currentUser, lastName: newValue }) as User | undefined);
+                        }}
+                      />
+                      <label className="block text-sm font-medium text-gray-700">Cargo</label>
+                      <Input 
+                        type="text" 
+                        placeholder="Digite o cargo do membro"
+                        value={userPostData?.companyPosition || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setUserPostData((currentUser) => ({ ...currentUser, companyPosition: newValue }) as User | undefined);
+                        }}
+                      />
+                      <label className="block text-sm font-medium text-gray-700">Senha</label>
+                      <Input 
+                        type="password" 
+                        placeholder="Digite a senha do membro"
+                        value={userPostData?.password || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setUserPostData((currentUser) => ({ ...currentUser, password: newValue }) as User | undefined);
+                        }}
+                      />
                     </div>
-
                   </div>
                   <SheetFooter>
-                    <Button variant="outline" onClick={handleCloseSheet}>
-                      Cancelar
-                    </Button>
-                    <Button onClick={handleSave}>Salvar</Button>
+                    <Button variant="outline" onClick={() => setIsSheetOpen(false)}>Cancelar</Button>
+                    <Button onClick={handlePostUser}>Salvar</Button>
                   </SheetFooter>
                 </SheetContent>
               </Sheet>
@@ -285,90 +295,96 @@ export default function EmpresaPage() {
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
           </TabsList>
           <TabsContent value="empresa">
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-4">Configurações da Conta</h2>
+            <div className="mt-4">
               <div className="border border-gray-300 p-4 rounded-lg bg-white">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nome da Empresa</label>
-                  <Input type="text" placeholder="Nome da Empresa" className="w-full" value={company?.companyName}
+                  <Input 
+                    type="text" 
+                    placeholder="Nome da Empresa" 
+                    className="w-full" 
+                    value={company?.companyName || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      setCompany((currentComapany) => ({ ...currentComapany, companyName: newValue }) as Company | undefined);
+                      setCompany((currentCompany) => ({ ...currentCompany, companyName: newValue }) as Company | undefined);
                     }}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">CNPJ</label>
-                  <Input type="text" placeholder="CNPJ" className="w-full" value={company?.CNPJ}
+                  <Input 
+                    type="text" 
+                    placeholder="CNPJ" 
+                    className="w-full" 
+                    value={company?.CNPJ || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      setCompany((currentComapany) => ({ ...currentComapany, CNPJ: newValue }) as Company | undefined);
+                      setCompany((currentCompany) => ({ ...currentCompany, CNPJ: newValue }) as Company | undefined);
                     }}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Site</label>
-                  <Input type="text" placeholder="Site" className="w-full" value={company?.site}
+                  <Input 
+                    type="text" 
+                    placeholder="Site" 
+                    className="w-full" 
+                    value={company?.site || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      setCompany((currentComapany) => ({ ...currentComapany, site: newValue }) as Company | undefined);
+                      setCompany((currentCompany) => ({ ...currentCompany, site: newValue }) as Company | undefined);
                     }}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Email da Empresa</label>
-                  <Input type="email" placeholder="Email da Empresa" className="w-full" value={company?.comercialEmail}
+                  <Input 
+                    type="email" 
+                    placeholder="Email da Empresa" 
+                    className="w-full" 
+                    value={company?.comercialEmail || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      setCompany((currentComapany) => ({ ...currentComapany, comercialEmail: newValue }) as Company | undefined);
+                      setCompany((currentCompany) => ({ ...currentCompany, comercialEmail: newValue }) as Company | undefined);
                     }}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Telefone da Empresa</label>
-                  <Input type="text" placeholder="Telefone da Empresa" className="w-full" value={company?.telephone}
+                  <Input 
+                    type="text" 
+                    placeholder="Telefone da Empresa" 
+                    className="w-full" 
+                    value={company?.telephone || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      setCompany((currentComapany) => ({ ...currentComapany, telephone: newValue }) as Company | undefined);
+                      setCompany((currentCompany) => ({ ...currentCompany, telephone: newValue }) as Company | undefined);
                     }}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Endereço da Empresa</label>
-                  <Input type="text" placeholder="Endereço da Empresa" className="w-full" value={company?.address}
+                  <Input 
+                    type="text" 
+                    placeholder="Endereço da Empresa" 
+                    className="w-full" 
+                    value={company?.address || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      setCompany((currentComapany) => ({ ...currentComapany, address: newValue }) as Company | undefined);
+                      setCompany((currentCompany) => ({ ...currentCompany, address: newValue }) as Company | undefined);
                     }}
-
                   />
                 </div>
                 <div className="flex items-center space-x-4 mb-4">
-                  <div className="flex-grow">
-
-                    <label className="block text-sm font-medium">Plano</label>
-
-                    <Select>
-                      <SelectTrigger className="w-full h-10 bg-muted" />
-                      <SelectContent>
-                        <SelectItem value="plano1">Plano 1</SelectItem>
-                        <SelectItem value="plano2">Plano 2</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-4 mt-4">
-                      <div className="relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
-                        <div className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 border border-gray-300 rounded-md shadow-sm">
-                          Carregar logotipo
-                        </div>
-                      </div>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 border border-gray-300 rounded-md shadow-sm mt-5 w-40 h-10">
+                      Carregar logotipo
                     </div>
                   </div>
                   <div>
@@ -378,20 +394,17 @@ export default function EmpresaPage() {
               </div>
             </div>
           </TabsContent>
-        <TabsContent value="usuarios">
-          <div className="p-6  min-h-screen">
-            <div className=" rounded-lg shadow mt-4">
-            <DataTable columns={columns} data={company?.user_Data} />
-            </div>
-          </div>
+          <TabsContent value="usuarios">
+            <Card>
+              <div className="rounded-lg shadow p-4 min-h-[calc(100%+20px)]">
+                <DataTable columns={columns} data={company?.user_Data ?? []} />
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
         <ToastViewport />
         {showToast && (
-          <Toast
-            onOpenChange={setShowToast}
-            variant={toastMessage?.variant}
-          >
+          <Toast onOpenChange={setShowToast} variant={toastMessage?.variant}>
             <ToastTitle>{toastMessage?.title}</ToastTitle>
             <ToastDescription>{toastMessage?.description}</ToastDescription>
             <ToastClose />

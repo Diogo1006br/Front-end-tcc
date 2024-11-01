@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react"
 import { FormField as FF } from "@/schema"
 import { useAppState } from "@/state/state"
+import { useAppStateEditor } from "@/state/stateEditor"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import api from "@/Modules/Auth"
@@ -86,14 +87,12 @@ import {
 
 
 //Imports types
-const formSchema = z.object({
-  file: z.instanceof(FileList).optional(),
-});
 
 
-export function Preview() {
+
+export function Preview({ id }: { id: any }) {
+  const { forms, selectedForm, resetForms } = useAppState(id);
   //Variables
-  const { forms,resetForms, selectedForm } = useAppState()
   const [alert, setAlert] = useState({ message: '', type: '' });
   let formFields = forms[selectedForm].fields
   const router = useRouter()
@@ -105,40 +104,56 @@ export function Preview() {
   })
 
   //Functions
-  async function onSubmit() {
+  async function onSubmit(data: any) {
     let values = { ...formFields, name: forms[selectedForm].name };
-    console.log("respostas", form.getValues());
-    console.log("form Fields", formFields);
-    console.log("selectedForm", selectedForm);
-    console.log("form name", forms[selectedForm].name);
-    try {
-      const response = await api.post('/forms/', values);
-      console.log(values);
-      console.log(response.data);
-      resetForms()
-      if (response.status === 201) {
-        setToastMessage({ title: 'Sucesso', description: 'Formulario criado com sucesso.', variant: 'default' });
-        console.log("alertaaa",alert.message);
-        setTimeout(() => {
-          router.push('/sistema/formularios/');
-        }, 1000);
-      } else {
-        setToastMessage({ title: 'Erro', description: 'Erro ao criar formulario.', variant: 'destructive' });
+
+    if(id !== undefined){
+      try {
+        const response = await api.put(`/forms/${id}/`, values);
+        resetForms();
+        if (response.status === 200) {
+          setToastMessage({ title: 'Sucesso', description: 'Formulário criado com sucesso.', variant: 'default' });
+          setTimeout(() => {
+            router.push('/sistema/formularios/');
+          }, 1000);
+        } else {
+          setToastMessage({ title: 'Erro', description: 'Erro ao criar formulário.', variant: 'destructive' });
+        }
+      } catch (error) {
+        console.error(error);
+        setToastMessage({ title: 'Erro', description: 'Erro ao criar formulário.', variant: 'destructive' });
       }
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-          // O servidor retornou uma resposta que não é 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-      } else if (error.request) {
-          // A requisição foi feita, mas não houve resposta
-          console.log(error.request);
-      } else {
-          // Algo aconteceu na configuração da requisição que disparou um erro
-          console.log('Error', error.message);
+    }else{
+      try {
+        const response = await api.post('/forms/', values);
+        console.log(values);
+        console.log(response.data);
+        resetForms()
+        if (response.status === 201) {
+          setToastMessage({ title: 'Sucesso', description: 'Formulario editado com sucesso.', variant: 'default' });
+          console.log("alertaaa",alert.message);
+          setTimeout(() => {
+            router.push('/sistema/formularios/');
+          }, 1000);
+        } else {
+          setToastMessage({ title: 'Erro', description: 'Erro ao editar o formulario.', variant: 'destructive' });
+        }
+      } catch (error) {
+        console.error(error);
+        if ((error as any).response) {
+            // O servidor retornou uma resposta que não é 2xx
+            console.log((error as any).response.data);
+            console.log((error as any).response.status);
+            console.log((error as any).response.headers);
+        } else if ((error as any).request) {
+            // A requisição foi feita, mas não houve resposta
+            console.log((error as any).request);
+        } else {
+            // Algo aconteceu na configuração da requisição que disparou um erro
+            console.log('Error', (error as any).message);
+        }
       }
+
     }
   }
 
@@ -149,13 +164,23 @@ export function Preview() {
       switch (f.type) {
         case "string":
           if (f.validation?.format === "email") {
-            schema[f.key] = z.string().email({ message: 'Email inválido' }).min(1, { message: 'Campo obrigatório' }).max(9999999999);
+            schema[f.key] = z
+              .string()
+              .email({ message: 'Email inválido' })
+              .min(1, { message: 'Campo obrigatório' })
+              .max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
           } else {
-            schema[f.key] = z.string().min(1, { message: 'Campo obrigatório' }).max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
+            schema[f.key] = z
+              .string()
+              .min(1, { message: 'Campo obrigatório' })
+              .max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
           }
           break;
         case "number":
-          schema[f.key] = z.coerce.number().min(f.validation?.min || 1, { message: `Valor mínimo é ${f.validation?.min}` }).max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
+          schema[f.key] = z
+            .coerce.number()
+            .min(f.validation?.min || 1, { message: `Valor mínimo é ${f.validation?.min}` })
+            .max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
           break;
         case "boolean":
           schema[f.key] = z.boolean();
@@ -167,52 +192,51 @@ export function Preview() {
           schema[f.key] = z.string().min(1, { message: 'Campo obrigatório' });
           break;
         case "file":
-          schema[f.key] = z.any().refine(file => {
-            if (file instanceof File) {
-              return ["image/jpeg", "image/png"].includes(file.type);
-            }
-            return false;
-          }, {
-            message: "Tipo de arquivo inválido",
-          });
+          schema[f.key] = z
+            .any()
+            .refine(file => file instanceof File && ["image/jpeg", "image/png"].includes(file.type), {
+              message: "Tipo de arquivo inválido",
+            });
           break;
         case "ElementForm":
           schema[f.key] = z.number();
           break;
         default:
+          break;
       }
     }
-    formSchema = z.object(schema);
-  }, [selectedForm]);
+    
+    // Atualizar o esquema do formulário com o novo schema
+    const newFormSchema = z.object(schema);
+    form.reset(newFormSchema);
+  }, [formFields, selectedForm , form]);
+  
 
 
   
   return (
     <main>
-      <ToastProvider>
-        <Form {...form}>
-          <form
-            noValidate
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-2 w-full"
-          >
-            
-              {formFields.map((f) => (
-                <>
-                  {f.type === "string" && StringField(f)}
-                  {f.type === "number" && NumberField(f)}
-                  {f.type === "date" && DateField(f)}
-                  {f.type === "boolean" && BooleanField(f)}
-                  {f.style === "radio" && RadioField(f)}
-                  {f.style === "select" && SelectField(f)}
-                  {f.style === "combobox" && ComboboxField(f)}
-                  {f.type === "file" && PhotoField(f)}
-                  {f.type === "ElementForm" && ElemenetButtonField(f)}
-
-                </>
-              ))}
-            <Button onClick={() => form.getValues()}>Salvar</Button>
-            
+    <ToastProvider>
+      <Form {...form}>
+        <form
+          noValidate
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-2 w-full"
+        >
+          {formFields.map((f) => (
+            <React.Fragment key={f.key}>  {/* Adicionando a 'key' */}
+              {f.type === "string" && StringField(f)}
+              {f.type === "number" && NumberField(f)}
+              {f.type === "date" && DateField(f)}
+              {f.type === "boolean" && BooleanField(f)}
+              {f.style === "radio" && RadioField(f)}
+              {f.style === "select" && SelectField(f)}
+              {f.style === "combobox" && ComboboxField(f)}
+              {f.type === "file" && PhotoField(f)}
+              {f.type === "ElementForm" && ElemenetButtonField(f)}
+            </React.Fragment>
+          ))}
+          <Button onClick={() => form.getValues()}>Salvar</Button>
 
           {alert.message && (
             <div className={`alert ${alert.type}`}>
@@ -223,18 +247,18 @@ export function Preview() {
               </Alert>
             </div>
           )}
-          </form>
-        </Form>
-        <ToastViewport/>
-        {toastMessage && (
-          <Toast variant={toastMessage.variant} open={!!toastMessage} onOpenChange={() => setToastMessage(null)}>
-            <ToastTitle>{toastMessage.title}</ToastTitle>
-            <ToastDescription>{toastMessage.description}</ToastDescription>
-            <ToastClose />
-          </Toast>
-        )}
-      </ToastProvider>
-    </main>
+        </form>
+      </Form>
+      <ToastViewport/>
+      {toastMessage && (
+        <Toast variant={toastMessage.variant} open={!!toastMessage} onOpenChange={() => setToastMessage(null)}>
+          <ToastTitle>{toastMessage.title}</ToastTitle>
+          <ToastDescription>{toastMessage.description}</ToastDescription>
+          <ToastClose />
+        </Toast>
+      )}
+    </ToastProvider>
+  </main>
   )
 
   //ComboboxField
@@ -251,13 +275,9 @@ export function Preview() {
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
-                    <Button variant="outline" role="combobox" className={cn("w-80 justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" role="combobox" className={cn("w-80 justify-between", !field.value && "text-muted-foreground")}>
                       {field.value
-                        ? f.enumValues?.find((item) => item.value === field.value)
-                            ?.label
+                        ? f.enumValues?.find((item) => item.value === field.value)?.label
                         : "Selecionar um item"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -269,25 +289,23 @@ export function Preview() {
                     <CommandEmpty>No {f.enumName} found.</CommandEmpty>
                     <CommandGroup>
                       <CommandList>
-                      {f.enumValues?.map((item) => (
-                        <CommandItem
-                          value={item.label}
-                          key={item.value}
-                          onSelect={() => {
-                            form.setValue(f.key, item.value)
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              item.value === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {item.label}
-                        </CommandItem>
-                      ))}
+                        {f.enumValues?.map((item) => (
+                          <CommandItem
+                            value={item.label}
+                            key={item.value} 
+                            onSelect={() => {
+                              form.setValue(f.key, item.value)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                item.value === field.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {item.label}
+                          </CommandItem>
+                        ))}
                       </CommandList>
                     </CommandGroup>
                   </Command>
@@ -298,10 +316,9 @@ export function Preview() {
           </Card>
         )}
       />
-    )
+    );
   }
-
-  //SelectField
+  
   function SelectField(f: FF) {
     return (
       <FormField
@@ -319,7 +336,9 @@ export function Preview() {
               </FormControl>
               <SelectContent>
                 {f.enumValues?.map((v) => (
-                  <SelectItem value={v.value}>{v.label}</SelectItem>
+                  <SelectItem key={v.value} value={v.value}>  {/* Adicionando 'key' */}
+                    {v.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -327,10 +346,9 @@ export function Preview() {
           </FormItem>
         )}
       />
-    )
+    );
   }
-
-  //RadioField
+  
   function RadioField(f: FF) {
     return (
       <FormField
@@ -347,7 +365,7 @@ export function Preview() {
                 className="flex flex-col space-y-1"
               >
                 {f.enumValues?.map((v) => (
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem key={v.value} className="flex items-center space-x-3 space-y-0">  {/* Adicionando 'key' */}
                     <FormControl>
                       <RadioGroupItem value={v.value} />
                     </FormControl>
@@ -360,7 +378,7 @@ export function Preview() {
           </FormItem>
         )}
       />
-    )
+    );
   }
 
   //BooleanField

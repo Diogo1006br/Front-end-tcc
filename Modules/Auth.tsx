@@ -1,54 +1,61 @@
 import axios from 'axios';
 
-// Cria uma instância do Axios com a URL base do back-end e permite envio de cookies.
+// Crie uma instância do axios
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_APIURL,  // URL do back-end, definida no arquivo .env.local
-  withCredentials: true,  // Isso permite que os cookies sejam enviados com cada solicitação
+  baseURL: process.env.NEXT_PUBLIC_APIURL,
+  withCredentials: true, // Permite envio automático de cookies com cada solicitação
 });
 
-// Interceptor para modificar ou adicionar lógica antes de enviar qualquer requisição
+// Adicione o cabeçalho Accept globalmente
+api.defaults.headers.common['Accept'] = 'application/json';
+
+// Interceptor de solicitação para configurar o token de autenticação
 api.interceptors.request.use(config => {
-  // Você pode modificar a configuração da requisição aqui (ex: adicionar cabeçalhos)
-  return config;  // Passa a requisição para ser enviada sem modificações
+  // Verifique se o token JWT está disponível e adicione-o ao cabeçalho Authorization
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
 }, error => {
-  return Promise.reject(error);  // Lida com erros de requisição
+  return Promise.reject(error);
 });
 
-// Interceptor para capturar a resposta de qualquer requisição feita
+// Interceptor de resposta para lidar com tokens expirados e renovação de tokens
 api.interceptors.response.use(response => {
-  // Verifica se a resposta foi bem-sucedida (status 200)
   if (response.status === 200) {
     console.log('A solicitação foi bem-sucedida');
   }
-  return response;  // Retorna a resposta para o código que fez a requisição
+  return response;
 }, async error => {
   const originalRequest = error.config;
 
-  // Se a resposta tiver o status 401 (não autorizado) e o token ainda não foi renovado
   if (error.response.status === 401 && !originalRequest._retry) {
-    originalRequest._retry = true;  // Marca a requisição para evitar loops infinitos
+    originalRequest._retry = true;
     try {
-      // Tenta renovar o token usando o endpoint de refresh token
-      const response = await axios.post(process.env.NEXT_PUBLIC_APIURL + 'api/token/refresh/', {}, {
-        withCredentials: true  // Envia os cookies junto com a solicitação de renovação
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_APIURL}api/token/refresh/`, {}, {
+        withCredentials: true
       });
 
-      // Se a renovação do token foi bem-sucedida (status 200)
       if (response.status === 200) {
-        console.log('Token atualizado');
-        return api(originalRequest);  // Reenvia a requisição original com o novo token
+        const newToken = response.data.accessToken;
+        // Armazene o novo token para futuras requisições
+        localStorage.setItem('accessToken', newToken);
+        // Atualize o cabeçalho Authorization da instância do axios
+        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+        return api(originalRequest);
       }
     } catch (refreshError) {
-      // Se a renovação falhar (ex: token de refresh também expirou)
       if ((refreshError as any).response && (refreshError as any).response.status === 401) {
         console.log('Token expirado');
-        // Redireciona o usuário para a página de login
+        // Redirecionar para a página de login
         window.location.href = '/login';
       }
     }
   }
 
-  return Promise.reject(error);  // Se outro erro ocorrer, rejeita a promessa com o erro
+  return Promise.reject(error);
 });
 
 export default api;

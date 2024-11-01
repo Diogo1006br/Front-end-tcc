@@ -28,8 +28,8 @@ import { DataTable } from "@/components/newtable/data-table";
 import { useState, useEffect } from "react";
 import { NewListSheet } from "@/components/addList/addList"; 
 
-export default function Projects() {
-  const [dropboxlist, setDropboxlist] = useState<Project[]>([]);
+export default function Lista() {
+  const [dropboxlist, setDropboxlist] = useState([]);
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {

@@ -2,61 +2,67 @@ import { Form, FormField } from "@/schema"
 import { persistentAtom } from "@nanostores/persistent"
 import { useStore } from "@nanostores/react"
 import { atom } from "nanostores"
-
 import { mockFields } from "@/components/formbuilder/mockFields"
+import { use, useEffect, useState, useRef } from 'react'
+import api from '@/Modules/Auth'
 
-import { use, useEffect,useState } from 'react';
-
-import api from '@/Modules/Auth';
 export type State = {
   selectedForm: number
   forms: Form[]
 }
+
 type FieldType = {
-  type: any;
-  id: any;
-  label: any;
-  key: any;
-  required: any;
-  validation: any;
-  value: any;
-};
+  type: any
+  id: any
+  label: any
+  key: any
+  required: any
+  validation: any
+  value: any
+}
 
 type FormType = {
-  name: string;
-  fields: FieldType[];
-};
+  name: string
+  fields: FieldType[]
+}
 
 export const $appState = persistentAtom<State>(
   "state",
-  { selectedForm: 0, forms: [{name:'myform', fields:mockFields}] },
+  { selectedForm: 0, forms: [{ name: 'myform', fields: mockFields }] },
   {
     encode: JSON.stringify,
     decode: JSON.parse,
   }
 )
 
-
-
 export function useAppStateEditor(id: string) {
- 
-  const state = useStore($appState);  
+  const state = useStore($appState)
+  const prevIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (prevIdRef.current !== id) {
+      fetchforms(id, state)
+      prevIdRef.current = id
+    }
+  }, [id, state])
+
   return {
     selectedForm: 0,
-    forms: state.forms,  // Retorna o estado local de "forms" em vez do estado global
+    forms: state.forms,
     selectForm,
     deleteForm,
     updateFormName,
     updateFormFields,
     newForm,
     setAppState,
-    fetchforms,
     resetForms,
   }
 }
+
 function resetForms() {
   setAppState({ selectedForm: 0, forms: [{ name: "My Form", fields: [] }] })
 }
+
 function setAppState(state: State) {
   $appState.set(state)
 }
@@ -68,35 +74,28 @@ function newForm(f: Form) {
     forms: currentForms.concat(f),
   })
 }
-async function fetchforms(id: string , Called : any , SetCalled: any) {
-  if (Called = false) {
-  
-    api.get(`/forms/${id}`) 
-      .then(response => {
-        const state = useStore($appState);
-        console.log('Resposta:', response);
-        const newState = {
-          ...state,
-          forms: [{
-            name: response.data.name,
-            fields: Object.entries(response.data.form).slice(0, -1).map(([key, field]: [string, any]) => field)
-          }]
-        };
-        
-        //remover entradas com undefined
-  
-        console.log('Novo estado:', newState);
-        $appState.set(newState);
-        SetCalled(true); // Atualiza o estado global com os dados carregados
-      })
-      .catch(error => {
-        console.error('Erro:', error);
-      });
+
+async function fetchforms(id: string, state: State) {
+  try {
+    const response = await api.get(`/forms/${id}`)
+    console.log('Resposta:', response)
+    const newState = {
+      ...state,
+      forms: [{
+        name: response.data.name,
+        fields: Object.entries(response.data.form).slice(0, -1).map(([key, field]: [string, any]) => field)
+      }]
     }
+    console.log('Novo estado:', newState)
+    $appState.set(newState)
+  } catch (error) {
+    console.error('Erro:', error)
+  }
 }
+
 function updateFormFields(p: FormField[]) {
   let newForms = $appState.get().forms
-  let selectedForm = $appState.get().selectedForm;
+  let selectedForm = $appState.get().selectedForm
   if (selectedForm < newForms.length) {
     newForms[selectedForm].fields = p
     $appState.set({
@@ -104,12 +103,11 @@ function updateFormFields(p: FormField[]) {
       forms: newForms,
     })
   } else {
-    console.error('Erro: selectedForm é um índice inválido em newForms');
+    console.error('Erro: selectedForm é um índice inválido em newForms')
   }
 }
 
 function selectForm(selectedForm: number) {
-  
   $appState.set({ ...$appState.get(), selectedForm })
 }
 

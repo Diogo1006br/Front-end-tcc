@@ -2,7 +2,8 @@ import { Form, FormField } from "@/schema"
 import { persistentAtom } from "@nanostores/persistent"
 import { useStore } from "@nanostores/react"
 import { atom } from "nanostores"
-import { useEffect } from "react"
+import { useEffect , useRef  } from "react"
+import api from '@/Modules/Auth'
 
 import { mockFields } from "@/components/formbuilder/mockFields"
 import { set } from "date-fns"
@@ -21,9 +22,16 @@ export const $appState = persistentAtom<State>(
   }
 )
 
-export function useAppState() {
+export function useAppState(id:any) {
+  const prevIdRef = useRef<string | null>(null)
+  const state = useStore($appState)
 
-  
+  if(id !== undefined){
+    if (prevIdRef.current !== id) {
+      fetchforms(id, state)
+      prevIdRef.current = id
+    }
+  } 
   return {
     selectedForm: useStore($appState).selectedForm,
     forms: useStore($appState).forms,
@@ -51,13 +59,36 @@ function newForm(f: Form) {
   })
 }
 
+async function fetchforms(id: string, state: State) {
+  try {
+    const response = await api.get(`/forms/${id}`)
+    console.log('Resposta:', response)
+    const newState = {
+      ...state,
+      forms: [{
+        name: response.data.name,
+        fields: Object.entries(response.data.form).slice(0, -1).map(([key, field]: [string, any]) => field)
+      }]
+    }
+    console.log('Novo estado:', newState)
+    $appState.set(newState)
+  } catch (error) {
+    console.error('Erro:', error)
+  }
+}
+
 function updateFormFields(p: FormField[]) {
   let newForms = $appState.get().forms
-  newForms[$appState.get().selectedForm].fields = p
-  $appState.set({
-    ...$appState.get(),
-    forms: newForms,
-  })
+  let selectedForm = $appState.get().selectedForm
+  if (selectedForm < newForms.length) {
+    newForms[selectedForm].fields = p
+    $appState.set({
+      ...$appState.get(),
+      forms: newForms,
+    })
+  } else {
+    console.error('Erro: selectedForm é um índice inválido em newForms')
+  }
 }
 
 function selectForm(selectedForm: number) {

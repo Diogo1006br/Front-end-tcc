@@ -1,8 +1,10 @@
 'use client';
 
 // Imports systems
-import React from 'react'; // Ajuste o caminho de importação conforme necessário
+import React from 'react';
+import api from '@/Modules/Auth'; // Ajuste o caminho de importação conforme necessário
 import { useMemo, useState, useEffect } from 'react';
+import { useAppState } from "@/state/state"
 import dynamic from 'next/dynamic';
 
 // Imports Components
@@ -54,6 +56,13 @@ interface Project {
   created_at: string;
 }
 
+interface NewData{
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  company: string;
+}
 interface projectnumber {
   project_numbers: number;
 }
@@ -66,6 +75,8 @@ interface formnumber {
 export default function SystemHome() {
   // vars
   const [projects, setProjects] = useState<Project[]>([]);
+  const id = undefined;
+  const {resetForms} = useAppState(id);
   const [NewProjectFormData, setNewProjectFormData] = useState({
     project_name: '',
     project_description: '',
@@ -74,9 +85,9 @@ export default function SystemHome() {
     updated_at: '',
     created_at: '',
   });
-
   
-  const [newData, setNewData] = useState([]);
+
+  const [newData, setNewData] = useState<NewData[]>([]);
   const [formNumber, setFormNumber] = useState({ form_numbers: 0 });
   const [projectNumber, setProjectNumber] = useState({ project_numbers: 0 });
   const [searchTermAll, setSearchTermAll] = useState("");
@@ -105,6 +116,58 @@ export default function SystemHome() {
   });
 
 
+
+  // Hooks
+
+  
+  useEffect(() => {
+    api.get('recent_projects/')
+      .then(response => setProjects(response.data))
+      .catch(error => console.error(error));
+  }, [hasChanged]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await api.get('/forms/');
+      setNewData(response.data);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    api.get('form_numbers/')
+      .then(response => setFormNumber(response.data))
+      .catch(error => console.error(error));
+  }, []);
+
+  useEffect(() => {
+    api.get('project_numbers/')
+      .then(response => setProjectNumber(response.data))
+      .catch(error => console.error(error));
+  }, [hasChanged]);
+
+  // Functions
+  const handleAddProject = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('projects/', NewProjectFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setProjects([...projects, response.data]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteProject = async (id: number) => {
+    try {
+      await api.delete(`/projects/${id}`);
+      setProjects(projects.filter(project => project.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   //Page return
   return (
     <main className='ml-4 mr-4 sm:mt-14'>
@@ -113,7 +176,7 @@ export default function SystemHome() {
         <Card className='shadow-md'>
           <CardHeader>
             <div className='flex items-center'>
-              <CardTitle></CardTitle>
+              <CardTitle>{projectNumber.project_numbers}</CardTitle>
               <Link href="/sistema/projetos" className="flex ml-auto items-center justify-center w-6 h-6 rounded-full hover:text-muted-foreground">
                 <FolderOpenDot/>
               </Link>
@@ -125,7 +188,7 @@ export default function SystemHome() {
         <Card className='shadow-md'>
           <CardHeader>
             <div className='flex items-center'>
-              <CardTitle></CardTitle>
+              <CardTitle>{formNumber.form_numbers}</CardTitle>
               <Link href="/sistema/formularios" className="flex ml-auto items-center justify-center w-6 h-6 rounded-full hover:text-muted-foreground">
                 <FolderCheck/>
               </Link>
@@ -137,7 +200,7 @@ export default function SystemHome() {
         <Card className='shadow-md'>
           <CardHeader>
             <div className='flex items-center'>
-              <CardTitle></CardTitle>
+              <CardTitle>{projectNumber.project_numbers}</CardTitle>
               <Link href="#" className="flex ml-auto items-center justify-center w-6 h-6 rounded-full hover:text-muted-foreground">
                 <Check/>
               </Link>
@@ -154,15 +217,23 @@ export default function SystemHome() {
             <CardTitle>Projetos Recentes</CardTitle>
           </div>
           <div className='flex items-end justify-end'>
-            <AddProject/>
+            <AddProject setHasChanged={setHasChanged} hasChanged={hasChanged} />
           </div>
         </div>
         
         <div className=" md:grid md:grid-cols-2 lg:grid lg:grid-cols-3 xl:grid xl:grid-cols-4">
-         {projects.map((project: Project) => (
-           <ul key={project.id}>
-           </ul>
-         ))} 
+        {Array.isArray(projects) && projects.map((project: Project) => (
+        <ul key={project.id}>
+          <ProjectCard
+            project_name={project.projectName}
+            project_description={project.projectDescription}
+            project_image={process.env.NEXT_PUBLIC_MEDIAURL + project.image}
+            project_created_at={project.created_at}
+            project_link={`/sistema/projetos/${project.id}`}
+            project_delete={() => handleDeleteProject(project.id)}
+          />
+        </ul>
+      ))}
         </div>
 
 
@@ -180,7 +251,9 @@ export default function SystemHome() {
               </div>
               <div>
                 <Link href="/sistema/formularios/NovoFormulario">
-                  <Button>Novo Formulário</Button>
+                  <Button 
+                   onClick={resetForms}
+                   >Novo Formulário</Button>
                 </Link>
               </div>
             </CardHeader>
@@ -195,7 +268,7 @@ export default function SystemHome() {
               <CardTitle>Alertas e Notificações</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex p-4 w-full bg-zinc-300 rounded-md dark:shadow-lg dark:shadow-darkInitialGradient dark:bg-gradient-to-tl dark:from-darkAlertCardColorI dark:to-darkAlertCardColorF dark:border-r-2 dark:border-t-2 border-none">
+              <div className="flex p-4 w-full bg-background rounded-md dark:bg-background border-none">
                 <FiBell className="h-6 w-6 mr-4 items-center" />
                 <div className="flex-1 h-18 w-full overflow-hidden">
                   <strong className="font-bold">Tipo do Alerta</strong>

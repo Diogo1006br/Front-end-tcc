@@ -30,7 +30,7 @@ const RowLink = ({ element_id, form_id, children }: { element_id: string; form_i
   </Link>
 );
 
-const ActionCell = ({ row }) => {
+const ActionCell = ({ row }: { row: { original: TableContent } }) => {
   const TableContent = row.original;
   const element_id = TableContent.id;
   const form_id = TableContent.form;
@@ -51,7 +51,7 @@ const ActionCell = ({ row }) => {
   };
 
   const handleDelete = (projectName: string) => {
-    setConfirmCallback(() => async (inputProjectName) => {
+    setConfirmCallback(() => async (inputProjectName: string) => {
       if (inputProjectName !== projectName) {
         setErrorMessage("Nome do projeto incorreto.");
         return;

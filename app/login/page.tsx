@@ -65,7 +65,6 @@ export default function Login() {
   return (
     <div className="flex flex-col justify-center items-center h-screen bg-zinc-700">
       <div className="p-4">
-        <Image src="" alt="GIIU" width={200} height={200} />
       </div>
       <div className="bg-zinc-100 rounded flex flex-col items-center justify-center p-8 w-96">
         <div className="flex flex-col items-center w-full">

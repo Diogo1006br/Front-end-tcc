@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react"
 import { useAppState } from "@/state/state"
+import { useAppStateEditor } from "@/state/stateEditor";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { PencilIcon } from "lucide-react"
-// import { PencilIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { BsPencil } from "react-icons/bs"
 import * as z from "zod"
@@ -21,13 +21,15 @@ export const editNameSchema = z.object({
   name: z.string(),
 })
 
-export function FormName({ onToggleOverlay }) {
-  const { forms, selectedForm, updateFormName } = useAppState();
+interface FormNameProps {
+  onToggleOverlay?: (isEditing: boolean) => void;
+  id: any;
+}
+
+export function FormName({ onToggleOverlay, id }: FormNameProps) {
+  const { forms, selectedForm, updateFormName } = useAppState(id);
   const [editName, setEditName] = useState(false);
-  
 
-
-  
   function toggleEdit() {
     setEditName(!editName)
     onToggleOverlay && onToggleOverlay(!editName); 
@@ -36,20 +38,19 @@ export function FormName({ onToggleOverlay }) {
   const form = useForm<z.infer<typeof editNameSchema>>({
     resolver: zodResolver(editNameSchema),
   })
+
+  // Corrigindo o useEffect para incluir 'form' e 'forms' como dependências
   useEffect(() => {
-    forms&&
-    form.setValue("name", forms[selectedForm].name)
-  }, [selectedForm])
+    if (forms) {
+      form.setValue("name", forms[selectedForm].name)
+    }
+  }, [selectedForm, forms, form]) // Incluindo 'forms' e 'form' como dependências
 
   function onSubmit(values: z.infer<typeof editNameSchema>) {
-    console.log("values", values)
     toggleEdit()
     updateFormName(values.name)
-    // editModelMutation.mutate({
-    //   ...values,
-    //   modelId: modelState.selectedModel,
-    // })
   }
+
   if (editName) {
     return (
       <>
@@ -63,7 +64,7 @@ export function FormName({ onToggleOverlay }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} className="focus:outline-none focus:ring-0 focus:border-transparent" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -78,22 +79,23 @@ export function FormName({ onToggleOverlay }) {
         </Form>
       </>
     )
-  } else
+  } else {
     return (
       <>
         <div className="flex flex-col">
           <h3 className="flex scroll-m-20 items-center gap-1  text-2xl font-semibold tracking-tight">
-            {forms&&forms[selectedForm].name||""}
+            {forms && forms[selectedForm].name || ""}
             <BsPencil
               onClick={toggleEdit}
               className="mb-1 ml-1 cursor-pointer"
               size={22}
-            />{" "}
+            />
           </h3>
           <p className="text-lg text-blue-400 ">
-            {forms&&forms[selectedForm].fields.length||0} Fields
+            {forms && forms[selectedForm].fields.length || 0} Fields
           </p>
         </div>
       </>
     )
+  }
 }
