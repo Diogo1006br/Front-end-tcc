@@ -1,19 +1,23 @@
 "use client";
 import React, { useState } from 'react';
-import { FormBuilderEditor } from '@/components/formbuilder/FormBuilderEditor';
-import { FormNameEditor } from '@/components/formbuilder/FormNameEditor';
-import { PreviewEditor } from '@/components/formbuilder/PreviewEditor';
-import AddProject from '@/components/addproject/addproject';
+import { FormBuilder } from '@/components/formbuilder/FormBuilder';
+import { FormName } from '@/components/formbuilder/FormName';
 import {
   Card,
   CardHeader,
 } from "@/components/ui/card";
+import { Preview } from '@/components/formbuilder/Preview';
+
+import Link from "next/link";
+
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface Props {
   params: { formulario: string };
@@ -22,51 +26,62 @@ interface Props {
 export default function Form({ params }: Props) {
   const [isOverlayActive, setOverlayActive] = useState(false);
 
-  const toggleOverlay = (active) => {
+  const toggleOverlay = (active: boolean) => { // Tipagem de `active` adicionada aqui
     setOverlayActive(active);
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-muted/40 mt-8">
+    <div className="relative flex min-h-screen w-full flex-col bg-muted/40">
       {isOverlayActive && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 pointer-events-auto"></div>
       )}
+      <header>
+        <Breadcrumb className="flex items-center gap-4 px-4 sm:border-t">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                  <Link href="/sistema">Inicio</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                  <Link href="/sistema/formularios">Formulários</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                  <Link href="#">Editar Formulário</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
 
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-6 sm:pr-6 z-50">
-        <Card x-chunk="dashboard-06-chunk-0" className="relative">
-          <div className="flex items-center">
-            <div className="basis-2/3">
-              <CardHeader>
-                <FormNameEditor id={params.formulario} onToggleOverlay={toggleOverlay} />
-              </CardHeader>
+      <main className="mr-4 ml-4 sm:m-4">
+        <section>
+          <Card x-chunk="dashboard-06-chunk-0" className='relative z-50 p-4 bg-white shadow-lg'>
+            <div className="flex items-center">
+                <CardHeader>
+                  <FormName id={params.formulario} onToggleOverlay={toggleOverlay} />
+                </CardHeader>
             </div>
-          </div>
-        </Card>
-      </div>
-      <Card className="flex-auto p-4 min-h-screen ml-8 mt-2 mr-8">
-        <Tabs defaultValue="editor" className="w-full">
-          <TabsList className="mx-auto justify-start gap-2 bg-gray-200 rounded-full mr-2">
-            <TabsTrigger
-              value="editor"
-              className="rounded-full bg-beige-200 text-black hover:bg-beige-300 w-20"
-            >
-              Editor
-            </TabsTrigger>
-            <TabsTrigger
-              value="preview"
-              className="rounded-full bg-beige-200 text-black hover:bg-beige-300 w-20"
-            >
-              Preview
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent className="w-full" value="editor">
-            <FormBuilderEditor id={params.formulario} />
-          </TabsContent>
-          <TabsContent value="preview">
-            <PreviewEditor id={params.formulario} />
-          </TabsContent>
-        </Tabs>
-      </Card>
+          </Card>
+        </section>
+
+        <section className='flex flex-col mt-4 z-30 gap-4 lg:flex-row'>
+          <Card className='min-h-96 rounded-2xl lg:flex-1'>
+            <FormBuilder id={params.formulario} />
+          </Card>
+          <Card className='min-h-96 rounded-2xl p-8 lg:min-w-[300px] lg:justify-end lg:items-end lg:ml-auto'>
+            <Preview id={params.formulario} />
+          </Card>
+
+
+        </section>
+
+      </main>        
     </div>
   );
 }
