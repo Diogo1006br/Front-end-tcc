@@ -166,8 +166,8 @@ export default function Forms() {
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-
-            <main className="mr-4 ml-4 sm:m-4">
+    
+            <main className="flex-grow mx-4 sm:mx-8">
                 {/* CardHeader Forms */}
                 <section>
                     <Card x-chunk="dashboard-06-chunk-0">
@@ -182,18 +182,16 @@ export default function Forms() {
                             </div>
                             <div className="flex basis-1/3 justify-end mr-8">
                                 <Link href="/sistema/formularios/NovoFormulario">
-                                    <Button className="mb-2" 
-                                    onClick={resetForms}>
+                                    <Button className="mb-2" onClick={resetForms}>
                                         Novo Formulário
                                     </Button>
                                 </Link>
                             </div>
                         </div>
                     </Card>
-
                 </section>
-
-                <section className="mt-4">
+    
+                <section className="mt-4 flex-grow">
                     <Tabs defaultValue="active">
                         <TabsList>
                             <TabsTrigger value="all">Todos</TabsTrigger>
@@ -201,9 +199,7 @@ export default function Forms() {
                             <TabsTrigger value="archived">Arquivados</TabsTrigger>
                         </TabsList>
                         <TabsContent value="all">
-                            <Card x-chunk="dashboard-06-chunk-0">
-                                <Link href="/sistema/lista">
-                                </Link>
+                            <Card x-chunk="dashboard-06-chunk-0" className="w-full">
                                 <CardContent className="flex flex-col w-full mt-2">
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
@@ -213,31 +209,31 @@ export default function Forms() {
                                             onChange={(e) => setSearchTermAll(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex mt-2 overflow-auto">
+                                    <div className="mt-2 overflow-auto w-full flex-grow">
                                         <DataTable columns={columns} data={filteredDataAll} />
                                     </div>
                                 </CardContent>
                             </Card>
                         </TabsContent>
                         <TabsContent value="active">
-                            <Card x-chunk="dashboard-06-chunk-0">
+                            <Card x-chunk="dashboard-06-chunk-0" className="w-full">
                                 <CardContent className="flex flex-col w-full mt-2">
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
-                                            className=" w-full"
+                                            className="w-full"
                                             placeholder="Buscar Formulários"
                                             onChange={(e) => setSearchTermActive(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex mt-2 overflow-auto">
+                                    <div className="mt-2 overflow-auto w-full flex-grow">
                                         <DataTable columns={columns} data={filteredDataActive} />
                                     </div>
                                 </CardContent>
                             </Card>
                         </TabsContent>
                         <TabsContent value="archived">
-                            <Card x-chunk="dashboard-06-chunk-0">
+                            <Card x-chunk="dashboard-06-chunk-0" className="w-full">
                                 <CardContent className="flex flex-col w-full mt-2">
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
@@ -247,7 +243,7 @@ export default function Forms() {
                                             onChange={(e) => setSearchTermArchived(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex mt-2 overflow-auto">
+                                    <div className="mt-2 overflow-auto w-full flex-grow">
                                         <DataTable columns={columns} data={filteredDataArchived} />
                                     </div>
                                 </CardContent>
@@ -258,4 +254,7 @@ export default function Forms() {
             </main>
         </div>
     );
+    
+    
+    
 }

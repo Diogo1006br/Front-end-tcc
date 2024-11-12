@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/ui/DataTableColumnHeader";
-import Link from "next/link";
 import api from "@/Modules/Auth";
 import ConfirmDeleteDialog from "@/components/ui/modal"; // Importando o dialog
 
@@ -104,6 +103,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
         {TableContent.status !== "Ativo" && (
           <DropdownMenuItem onClick={handleAtivoClick}>Ativo</DropdownMenuItem>
         )}
+        <DropdownMenuItem >Exportar</DropdownMenuItem>
       </DropdownMenuContent>
       <ConfirmDeleteDialog
         isOpen={isDialogOpen}
@@ -130,9 +130,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const TableContent = row.original;
 
         return (
-          <Link href={`/sistema/ativos/${TableContent.id}`}>
-            <div className="cursor-pointer">{TableContent.assetName}</div>
-          </Link>
+          <div className="cursor-pointer">{TableContent.assetName}</div>
         );
       },
     },
@@ -143,9 +141,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const TableContent = row.original;
 
         return (
-          <Link href={`/sistema/ativos/${TableContent.id}`}>
-            <div className="cursor-pointer">{TableContent.status}</div>
-          </Link>
+          <div className="cursor-pointer">{TableContent.status}</div>
         );
       },
     },
@@ -159,9 +155,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const TableContent = row.original;
 
         return (
-          <Link href={`/sistema/ativos/${TableContent.id}`}>
-            <div className="cursor-pointer">{TableContent.form_name}</div>
-          </Link>
+          <div className="cursor-pointer">{TableContent.form_name}</div>
         );
       },
     },

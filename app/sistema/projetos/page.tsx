@@ -177,7 +177,7 @@ export default function Projects() {
     }, [searchTermArchived, projects]);
 
     return (
-        //Breadcrumbs
+        // Breadcrumbs
         <div className="flex min-h-screen flex-col">
             <header className="flex items-center gap-4 px-4 sm:border-t">
                 <Breadcrumb>
@@ -195,10 +195,10 @@ export default function Projects() {
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                     </BreadcrumbList>
-                </Breadcrumb> 
+                </Breadcrumb>
             </header>
-        
-            <main className="mr-4 ml-4 sm:m-4">
+    
+            <main className="flex-grow mr-4 ml-4 sm:m-4">
                 {/* CardHeader Projects */}
                 <section>
                     <Card x-chunk="dashboard-06-chunk-0">
@@ -212,13 +212,13 @@ export default function Projects() {
                                 </CardHeader>
                             </div>
                             <div className="flex basis-1/3 justify-end mr-8">
-                                <AddProject setHasChanged={setHasChanged} hasChanged={hasChanged}/>
+                                <AddProject setHasChanged={setHasChanged} hasChanged={hasChanged} />
                             </div>
                         </div>
                     </Card>
                 </section>
-
-                <section className="mt-4">
+    
+                <section className="mt-4 flex-grow">
                     <Tabs defaultValue="active">
                         <TabsList>
                             <TabsTrigger value="all">Todos</TabsTrigger>
@@ -226,8 +226,8 @@ export default function Projects() {
                             <TabsTrigger value="archived">Arquivados</TabsTrigger>
                         </TabsList>
                         <TabsContent value="all">
-                            <Card x-chunk="dashboard-06-chunk-0">
-                                <CardContent className="flex flex-col w-full mt-2">
+                            <Card x-chunk="dashboard-06-chunk-0" className="h-full w-full">
+                                <CardContent className="flex flex-col w-full h-full mt-2">
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
@@ -236,15 +236,15 @@ export default function Projects() {
                                             onChange={(e) => setSearchTermAll(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex mt-2 overflow-auto">
+                                    <div className="mt-2 overflow-auto flex-grow w-full">
                                         <DataTable columns={columns} data={filteredDataAll} />
                                     </div>
                                 </CardContent>
                             </Card>
                         </TabsContent>
                         <TabsContent value="active">
-                            <Card x-chunk="dashboard-06-chunk-0">
-                                <CardContent className="flex flex-col w-full mt-2">
+                            <Card x-chunk="dashboard-06-chunk-0" className="h-full w-full">
+                                <CardContent className="flex flex-col w-full h-full mt-2">
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
@@ -253,15 +253,15 @@ export default function Projects() {
                                             onChange={(e) => setSearchTermActive(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex mt-2 overflow-auto">
+                                    <div className="mt-2 overflow-auto flex-grow w-full">
                                         <DataTable columns={columns} data={filteredDataActive} />
                                     </div>
                                 </CardContent>
                             </Card>
                         </TabsContent>
                         <TabsContent value="archived">
-                            <Card x-chunk="dashboard-06-chunk-0">
-                                <CardContent className="flex flex-col w-full mt-2">
+                            <Card x-chunk="dashboard-06-chunk-0" className="h-full w-full">
+                                <CardContent className="flex flex-col w-full h-full mt-2">
                                     <div className="flex items-center gap-2">
                                         <Search className="w-8" />
                                         <Input
@@ -270,7 +270,7 @@ export default function Projects() {
                                             onChange={(e) => setSearchTermArchived(e.target.value)}
                                         />
                                     </div>
-                                    <div className="flex mt-2 overflow-auto">
+                                    <div className="mt-2 overflow-auto flex-grow w-full">
                                         <DataTable columns={columns} data={filteredDataArchived} />
                                     </div>
                                 </CardContent>
@@ -280,5 +280,6 @@ export default function Projects() {
                 </section>
             </main>
         </div>
-    )
+    );
+    
 }

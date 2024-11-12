@@ -174,22 +174,6 @@ export function Sidebar() {
                     </TooltipTrigger>
                     <TooltipContent side='right'>Projetos</TooltipContent>
                   </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Link 
-                        href="/sistema/empresa"
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg
-                        text-muted-foreground transition-colors hover:text-card-foreground">
-                          <Building2 className='w-5 h-5' />
-                          <span className='sr-only'>Empresa</span>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side='right'>Empresa</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                  </Tooltip>
-
                   <Tooltip>
                     <TooltipTrigger>
                       <Link 
@@ -251,10 +235,6 @@ export function Sidebar() {
                 <BookText className='w-5 h-5 transition-all' />
                 Projetos
               </Link>
-              <Link href="/sistema/empresa" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                <Building2 className='w-5 h-5 transition-all' />
-                Empresa
-              </Link>
               <Link href="/sistema/usuario" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
                 <User className='w-5 h-5 transition-all' />
                 Usuário
@@ -301,10 +281,7 @@ export function Sidebar() {
                     Projetos
                 </Link>
 
-                <Link href="/sistema/empresa" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <Building2 className='w-5 h-5 transition-all ' />
-                    Empresa
-                </Link>
+                
 
                 <Link href="/sistema/usuario" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
                     <User className='w-5 h-5 transition-all ' />
@@ -322,113 +299,3 @@ export function Sidebar() {
     </div>
   );
 }
-
-
-
-
-// import React, { useState, useEffect, useRef } from "react";
-// import { Button } from "@/components/ui/button";
-// import Link from "next/link";
-// import { SidebarItem } from "@/components/ui/sidebarItem";
-// import { Home, User, Building2, BookText, FolderCheck, Bolt } from 'lucide-react';
-// import api from "@/Modules/Auth";
-
-// export function Sidebar() {
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [clientName, setClientName] = useState("Nome do Cliente");
-//   const sidebarRef = useRef<HTMLDivElement>(null);
-
-//   useEffect(() => {
-//     api.get("logeduser/").then((response) => {
-//       setClientName(response.data.firstName);
-//     });
-//   }, []);
-
-//   const toggleSidebar = () => {
-//     setIsOpen(!isOpen);
-//   };
-
-//   const handleClickOutside = (event: MouseEvent) => {
-//     if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-//       setIsOpen(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     document.addEventListener("mousedown", handleClickOutside);
-//     return () => {
-//       document.removeEventListener("mousedown", handleClickOutside);
-//     };
-//   }, []);
-
-//   return (
-//     <div
-//       ref={sidebarRef}
-//       className={`flex h-screen border-0 dark:bg-darkSidebar bg-zinc-700 transition-all duration-500 ease-in-out ${isOpen ? 'w-56' : 'w-15'}`}
-//     >
-//       <div className={`flex flex-col items-center justify-between h-full text-gray-200 ${isOpen ? 'text-center' : 'text-left'}`}>
-//         <div className={`p-2 mt-15 relative transition-all duration-300 ease-in-out ${isOpen ? 'text-center' : 'text-left'}`}>
-//           <Button
-//             size="icon"
-//             aria-label="Home"
-//             color="white"
-//             className={`w-8 h-8 md:w-11 md:h-11 transition-all duration-300 ease-in-out ${isOpen ? 'w-8 h-8 ml-12 md:w-16 md:h-16 md:ml-8' : ''}`}
-//             onClick={toggleSidebar}
-//           >
-//             <img src="/vercel.svg" alt="Logo" className="w-full h-full fill-foreground" />
-//           </Button>
-
-//           <div className={`flex items-center mt-2 ${isOpen ? 'ml-12 md:ml-8 ' : ''}`}>
-        
-//   {isOpen && (
-//     <>
-//       <h3 className="text-lg font-bold hidden md:block">{clientName}</h3>
-//       <h6 className="text-sm font-bold block md:hidden ">{clientName}</h6>
-//     </>
-//   )}
-// </div>
-
-
-//           <div className={`border-t ${isOpen ? 'border-white' : 'border-transparent'} mt-1 pt-4 w-full ml-4 ${isOpen ? 'hidden md:block' : 'block md:hidden'}`}></div>
-
-
-
-//         </div>
-
-//         <div className="flex-1 flex flex-col items-center justify-center absolute inset-0 mt-35 ml-0.5 md:ml-1">
-//           <ul className="flex flex-col gap-1 md:gap-8  w-full">
-//             <Link href="/sistema" className="w-full">
-//               <SidebarItem text="Inicio" Icon={Home} onClick={toggleSidebar} isOpen={isOpen} />
-//             </Link>
-//             <Link href='/sistema/formularios' className="w-full">
-//               <SidebarItem text="Formulários" Icon={BookText} onClick={toggleSidebar} isOpen={isOpen} />
-//             </Link>
-//             <Link href='/sistema/projetos' className="w-full">
-//               <SidebarItem text="Projetos" Icon={FolderCheck} onClick={toggleSidebar} isOpen={isOpen} />
-//             </Link>
-//             <Link href="/sistema/empresa" className="w-full">
-//               <SidebarItem text="Empresa" Icon={Building2} onClick={toggleSidebar} isOpen={isOpen} />
-//             </Link>
-//             <Link href="/sistema/usuario" className="w-full">
-//               <SidebarItem text="Usuário" Icon={User} onClick={toggleSidebar} isOpen={isOpen} />
-//             </Link>
-//             <Link href="/sistema/configs" className="w-full">
-//               <SidebarItem text="Configurações" Icon={Bolt} onClick={toggleSidebar} isOpen={isOpen} />
-//             </Link>
-//           </ul>
-//         </div>
-
-
-
-//         <div className={`flex justify-center w-full p-2 ${isOpen ? 'mr-4' : 'mr-'} mt-auto`}>
-//           {isOpen ? (
-//             <img src="/logoCompleta.png" alt="Logo Completa" className="w-16 ml-12 md:w-32 md:ml-8 h-auto fill-foreground" />
-//           ) : (
-//             <img src="/logoReduzida.png" alt="Logo Reduzida" className="w-6 md:w-8  h-auto fill-foreground" />
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-// export default Sidebar;
