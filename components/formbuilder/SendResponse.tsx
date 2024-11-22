@@ -9,7 +9,7 @@ import { z } from "zod";
 import { toast, ToastContainer } from "react-toastify";
 import { ChevronsUpDown, Check, CalendarIcon } from "lucide-react";
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandList, CommandItem } from "@/components/ui/command";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -28,14 +28,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import ImageUploader from "@/components/formbuilder/ImageUploader";
-import AddElement from '@/components/formbuilder/AddElement';
+import AddElement from "@/components/formbuilder/AddElement";
 
 // Utility function to conditionally join class names
 function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
-export function Sender({ params }: { params: { id: any, asset: string, instance: string } }) {
+export function Sender({ params }: { params: { id: any; asset: string; instance: string } }) {
   const { id, asset, instance } = params;
   const [formsAll, setAllForm] = useState([]);
   const { forms, selectedForm } = useAppStateEditor(id);
@@ -104,32 +104,25 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
   }, []);
 
   useEffect(() => {
-    api.get('form-responses/', {
+    api.get("form-responses/", {
       params: {
         formID: params.id,
         Asset: params.asset,
-        content_type: params.instance
-      }
-    }).then(response => {
-      const formData = response.data;
-      const responses = formData.response;
-
-      if (responses.length === 0) {
-        form.getValues().forEach((key: string) => {
-          form.setValue(key, '');
-        });
-      } else {
-        Object.entries(responses).forEach(([key, value]) => {
+        content_type: params.instance,
+      },
+    })
+      .then((response) => {
+        const formData = response.data?.response || {};
+        Object.entries(formData).forEach(([key, value]) => {
           if (value !== undefined) {
             form.setValue(key, value);
           }
         });
-      }
-    })
-      .catch(error => {
-        console.error(error);
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar dados do formulário:", error);
       });
-  }, [form, params.asset, params.id, params.instance]);
+  }, [params.asset, params.id, params.instance, form]);
 
   const validateForm = (fields: any[]) => {
     let isValid = true;
@@ -147,20 +140,48 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
 
   async function onSubmit() {
     const fields = formFields;
+
     if (validateForm(fields)) {
-      let values = { formID: id, response: form.getValues(), object_id: asset, response_type: instance };
+      const values = {
+        formID: id,
+        response: form.getValues(),
+        object_id: asset,
+        response_type: instance,
+      };
+
       try {
-        const response = await api.post(`/form-responses/`, values).then(response => {
-          if (response.status === 200) {
-            toast.success("Resposta enviada com sucesso.");
-          } else {
-            toast.error("Erro ao enviar resposta.");
+        // Envia os dados do formulário para o backend
+        const response = await api.post(`/form-responses/`, values);
+
+        if (response.status === 200) {
+          toast.success("Resposta enviada com sucesso.");
+
+          // Atualiza o estado local com os valores salvos
+          const updatedFormResponse = await api.get("form-responses/", {
+            params: {
+              formID: params.id,
+              Asset: params.asset,
+              content_type: params.instance,
+            },
+          });
+
+          const updatedResponses = updatedFormResponse.data?.response || {};
+
+          if (Object.keys(updatedResponses).length > 0) {
+            // Atualiza os campos no front-end
+            Object.entries(updatedResponses).forEach(([key, value]) => {
+              form.setValue(key, value); // Atualiza cada campo
+            });
           }
-        });
-      } catch (error: any) {
-        console.error(error);
+        } else {
+          toast.error("Erro ao enviar resposta.");
+        }
+      } catch (error) {
+        console.error("Erro ao salvar resposta:", error);
         toast.error("Erro ao enviar resposta.");
       }
+
+      // Upload de imagens, se necessário
       try {
         let ImageData;
         for (let key in file) {
@@ -168,22 +189,23 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
             image: file[key],
             object_id: params.asset,
             response_type: "Asset",
-            questionKey: key
+            questionKey: key,
           };
         }
+
         if (ImageData?.object_id !== undefined) {
-        const response = await api.post(`/images/`, ImageData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+          await api.post(`/images/`, ImageData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
         }
-      } catch (error: any) {
-        console.error(error);
+      } catch (error) {
+        console.error("Erro ao enviar imagem:", error);
         toast.error("Erro ao enviar imagem.");
       }
     } else {
-      setError("Preencha todos os campos obrigatorios.");
+      setError("Preencha todos os campos obrigatórios.");
     }
   }
 
@@ -213,11 +235,14 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>Salvar</Button>
+        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>
+          Salvar
+        </Button>
       </form>
       <ToastContainer />
     </Form>
   );
+
 
   function ComboboxField(f: FF) {
     return (
