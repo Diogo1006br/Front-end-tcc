@@ -190,18 +190,6 @@ export function Sidebar() {
                 </TooltipProvider>
               </nav>
               <nav className='mt-auto flex flex-col items-center gap-4 px-2 py-5'>
-                <Link href="#"
-                      className="flex h-9 w-9 shrink-0 items-center justify-center
-                      text-primary-foreground rounded-full">
-                  <Image 
-                    src="/logoReduzida.png" 
-                    alt="Logo Reduzida"
-                    width={24}   // Defina explicitamente a largura
-                    height={24}  // Defina explicitamente a altura
-                    className="w-6 h-6" // Estilos adicionais se necessários
-                  />
-                  <span className='sr-only'>Menu</span>
-                </Link>
               </nav>
             </aside>
         </SheetTrigger>
@@ -250,52 +238,6 @@ export function Sidebar() {
           </aside>
         </SheetContent>
       </Sheet>
-
-      {/* Config para sidebar no mobile */}
-      <div className="sm:hidden flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className='sticky top-0 z-30 flex h-14 items-center px-4 border-b bg-background  gap-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6'>
-          <Sheet>
-            <SheetTrigger asChild>
-                <Button variant="outline" className='sm:hidden'>
-                  <Menu className='w-5 h-5' />
-                </Button>
-            </SheetTrigger>
-            <SunMoon className='ml-auto'/>
-            <Switch id="darkMode" onCheckedChange={() => setIsDarkMode(true)}/>
-
-            <SheetContent side="left" className='sm:max-w-x'>
-              <nav className='"grid gap-6 text-lg font-medium'>
-
-                <Link href="/sistema" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <Home className='w-5 h-5 transition-all ' />
-                    Inicio
-                </Link>
-
-                <Link href="/sistema/formularios" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <FolderCheck className='w-5 h-5 transition-all ' />
-                    Formulários
-                </Link>
-
-                <Link href="/sistema/projetos" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <BookText className='w-5 h-5 transition-all ' />
-                    Projetos
-                </Link>
-
-                
-
-                <Link href="/sistema/usuario" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <User className='w-5 h-5 transition-all ' />
-                    Usuário
-                </Link>
-                <Link href="/sistema/configuracoes" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <Settings className='w-5 h-5 transition-all' /> 
-                    Configurações
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </header>
-      </div>
     </div>
   );
 }
