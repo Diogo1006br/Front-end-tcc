@@ -7,9 +7,10 @@ import api from "@/Modules/Auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast, ToastContainer } from "react-toastify";
+import { jsPDF } from "jspdf";
 import { ChevronsUpDown, Check, CalendarIcon } from "lucide-react";
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandList, CommandItem } from "@/components/ui/command";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -28,14 +29,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import ImageUploader from "@/components/formbuilder/ImageUploader";
-import AddElement from '@/components/formbuilder/AddElement';
+import AddElement from "@/components/formbuilder/AddElement";
 
 // Utility function to conditionally join class names
 function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
-export function Sender({ params }: { params: { id: any, asset: string, instance: string } }) {
+export function Sender({ params }: { params: { id: any; asset: string; instance: string } }) {
   const { id, asset, instance } = params;
   const [formsAll, setAllForm] = useState([]);
   const { forms, selectedForm } = useAppStateEditor(id);
@@ -104,32 +105,25 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
   }, []);
 
   useEffect(() => {
-    api.get('form-responses/', {
+    api.get("form-responses/", {
       params: {
         formID: params.id,
         Asset: params.asset,
-        content_type: params.instance
-      }
-    }).then(response => {
-      const formData = response.data;
-      const responses = formData.response;
-
-      if (responses.length === 0) {
-        form.getValues().forEach((key: string) => {
-          form.setValue(key, '');
-        });
-      } else {
-        Object.entries(responses).forEach(([key, value]) => {
+        content_type: params.instance,
+      },
+    })
+      .then((response) => {
+        const formData = response.data?.response || {};
+        Object.entries(formData).forEach(([key, value]) => {
           if (value !== undefined) {
             form.setValue(key, value);
           }
         });
-      }
-    })
-      .catch(error => {
-        console.error(error);
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar dados do formulário:", error);
       });
-  }, [form, params.asset, params.id, params.instance]);
+  }, [params.asset, params.id, params.instance, form]);
 
   const validateForm = (fields: any[]) => {
     let isValid = true;
@@ -145,45 +139,106 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
     return isValid;
   };
 
+  async function generatePDF(responseData: Record<string, any>, fileData: Record<string, File>) {
+    const doc = new jsPDF();
+    const date = new Date().toLocaleDateString();
+
+    doc.setFontSize(16);
+    doc.text("Relatório", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Data: ${date}`, 20, 30);
+
+    let y = 40;
+
+    Object.entries(responseData).forEach(([key, value]) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+
+      const label = formFields.find((f) => f.key === key)?.label || key;
+
+      if (typeof value === "string" && value.startsWith("http")) {
+        const img = new Image();
+        img.src = value;
+        doc.text(`${label}:`, 20, y);
+        y += 10;
+        doc.addImage(img, "PNG", 20, y, 50, 50);
+        y += 60;
+      } else {
+        doc.text(`${label}: ${value}`, 20, y);
+        y += 10;
+      }
+    });
+
+    Object.entries(fileData).forEach(([key, file]) => {
+      const label = formFields.find((f) => f.key === key)?.label || key;
+
+      const reader = new FileReader();
+      reader.onload = function (e: ProgressEvent<FileReader>) {
+        const image = e.target?.result as string;
+
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.text(`${label}:`, 20, y);
+        y += 10;
+        doc.addImage(image, "PNG", 20, y, 50, 50);
+        y += 60;
+        doc.save(`Relatorio_${date}.pdf`);
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    doc.save(`Relatorio_${date}.pdf`);
+  }
+
   async function onSubmit() {
     const fields = formFields;
+
     if (validateForm(fields)) {
-      let values = { formID: id, response: form.getValues(), object_id: asset, response_type: instance };
+      const values = {
+        formID: id,
+        response: form.getValues(),
+        object_id: asset,
+        response_type: instance,
+      };
+
       try {
-        const response = await api.post(`/form-responses/`, values).then(response => {
-          if (response.status === 200) {
-            toast.success("Resposta enviada com sucesso.");
-          } else {
-            toast.error("Erro ao enviar resposta.");
+        const response = await api.post(`/form-responses/`, values);
+
+        if (response.status === 200) {
+          toast.success("Resposta enviada com sucesso.");
+
+          const updatedFormResponse = await api.get("form-responses/", {
+            params: {
+              formID: params.id,
+              Asset: params.asset,
+              content_type: params.instance,
+            },
+          });
+
+          const updatedResponses = updatedFormResponse.data?.response || {};
+
+          if (Object.keys(updatedResponses).length > 0) {
+            Object.entries(updatedResponses).forEach(([key, value]) => {
+              form.setValue(key, value);
+            });
           }
-        });
-      } catch (error: any) {
-        console.error(error);
+
+          generatePDF(values.response, file);
+        } else {
+          toast.error("Erro ao enviar resposta.");
+        }
+      } catch (error) {
+        console.error("Erro ao salvar resposta:", error);
         toast.error("Erro ao enviar resposta.");
       }
-      try {
-        let ImageData;
-        for (let key in file) {
-          ImageData = {
-            image: file[key],
-            object_id: params.asset,
-            response_type: "Asset",
-            questionKey: key
-          };
-        }
-        if (ImageData?.object_id !== undefined) {
-        const response = await api.post(`/images/`, ImageData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        }
-      } catch (error: any) {
-        console.error(error);
-        toast.error("Erro ao enviar imagem.");
-      }
     } else {
-      setError("Preencha todos os campos obrigatorios.");
+      setError("Preencha todos os campos obrigatórios.");
     }
   }
 
@@ -213,7 +268,9 @@ export function Sender({ params }: { params: { id: any, asset: string, instance:
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>Salvar</Button>
+        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>
+          Salvar
+        </Button>
       </form>
       <ToastContainer />
     </Form>
