@@ -7,6 +7,7 @@ import api from "@/Modules/Auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast, ToastContainer } from "react-toastify";
+import { jsPDF } from "jspdf";
 import { ChevronsUpDown, Check, CalendarIcon } from "lucide-react";
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandList, CommandItem } from "@/components/ui/command";
 import "react-toastify/dist/ReactToastify.css";
@@ -138,6 +139,63 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     return isValid;
   };
 
+  async function generatePDF(responseData: Record<string, any>, fileData: Record<string, File>) {
+    const doc = new jsPDF();
+    const date = new Date().toLocaleDateString();
+
+    doc.setFontSize(16);
+    doc.text("Relatório", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Data: ${date}`, 20, 30);
+
+    let y = 40;
+
+    Object.entries(responseData).forEach(([key, value]) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+
+      const label = formFields.find((f) => f.key === key)?.label || key;
+
+      if (typeof value === "string" && value.startsWith("http")) {
+        const img = new Image();
+        img.src = value;
+        doc.text(`${label}:`, 20, y);
+        y += 10;
+        doc.addImage(img, "PNG", 20, y, 50, 50);
+        y += 60;
+      } else {
+        doc.text(`${label}: ${value}`, 20, y);
+        y += 10;
+      }
+    });
+
+    Object.entries(fileData).forEach(([key, file]) => {
+      const label = formFields.find((f) => f.key === key)?.label || key;
+
+      const reader = new FileReader();
+      reader.onload = function (e: ProgressEvent<FileReader>) {
+        const image = e.target?.result as string;
+
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.text(`${label}:`, 20, y);
+        y += 10;
+        doc.addImage(image, "PNG", 20, y, 50, 50);
+        y += 60;
+        doc.save(`Relatorio_${date}.pdf`);
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    doc.save(`Relatorio_${date}.pdf`);
+  }
+
   async function onSubmit() {
     const fields = formFields;
 
@@ -150,13 +208,11 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
       };
 
       try {
-        // Envia os dados do formulário para o backend
         const response = await api.post(`/form-responses/`, values);
 
         if (response.status === 200) {
           toast.success("Resposta enviada com sucesso.");
 
-          // Atualiza o estado local com os valores salvos
           const updatedFormResponse = await api.get("form-responses/", {
             params: {
               formID: params.id,
@@ -168,41 +224,18 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
           const updatedResponses = updatedFormResponse.data?.response || {};
 
           if (Object.keys(updatedResponses).length > 0) {
-            // Atualiza os campos no front-end
             Object.entries(updatedResponses).forEach(([key, value]) => {
-              form.setValue(key, value); // Atualiza cada campo
+              form.setValue(key, value);
             });
           }
+
+          generatePDF(values.response, file);
         } else {
           toast.error("Erro ao enviar resposta.");
         }
       } catch (error) {
         console.error("Erro ao salvar resposta:", error);
         toast.error("Erro ao enviar resposta.");
-      }
-
-      // Upload de imagens, se necessário
-      try {
-        let ImageData;
-        for (let key in file) {
-          ImageData = {
-            image: file[key],
-            object_id: params.asset,
-            response_type: "Asset",
-            questionKey: key,
-          };
-        }
-
-        if (ImageData?.object_id !== undefined) {
-          await api.post(`/images/`, ImageData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-        }
-      } catch (error) {
-        console.error("Erro ao enviar imagem:", error);
-        toast.error("Erro ao enviar imagem.");
       }
     } else {
       setError("Preencha todos os campos obrigatórios.");
@@ -242,7 +275,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
       <ToastContainer />
     </Form>
   );
-
 
   function ComboboxField(f: FF) {
     return (
