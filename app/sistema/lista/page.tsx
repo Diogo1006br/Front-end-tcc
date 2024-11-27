@@ -26,7 +26,7 @@ import api from '@/Modules/Auth';
 import { columns } from "./columns";
 import { DataTable } from "@/components/newtable/data-table";
 import { useState, useEffect } from "react";
-import { NewListSheet } from "@/components/addList/addList"; 
+
 
 export default function Lista() {
   const [dropboxlist, setDropboxlist] = useState([]);
@@ -79,9 +79,6 @@ export default function Lista() {
                 <CardTitle>Lista</CardTitle>
                 <CardDescription>Gerencie suas listas.</CardDescription>
               </CardHeader>
-            </div>
-            <div className="flex basis-1/3 justify-end mr-8">
-              <NewListSheet setHasChanged={setHasChanged} hasChanged={hasChanged} />
             </div>
           </div>
         </Card>

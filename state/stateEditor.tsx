@@ -56,6 +56,7 @@ export function useAppStateEditor(id: string) {
     newForm,
     setAppState,
     resetForms,
+    fetchforms,
   }
 }
 

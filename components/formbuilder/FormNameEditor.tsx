@@ -1,49 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"
+import { useAppState } from "@/state/state"
 import { useAppStateEditor } from "@/state/stateEditor";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { BsPencil } from "react-icons/bs";
-import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { PencilIcon } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { BsPencil } from "react-icons/bs"
+import * as z from "zod"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 
 export const editNameSchema = z.object({
   name: z.string(),
-});
+})
 
-export function FormNameEditor({ id, onToggleOverlay }) {
-  const { forms, selectedForm, updateFormName , fetchforms } = useAppStateEditor(id);
+interface FormNameProps {
+  onToggleOverlay?: (isEditing: boolean) => void;
+  id: any;
+}
+
+export function FormName({ onToggleOverlay, id }: FormNameProps) {
+  const { forms, selectedForm, updateFormName } = useAppState(id);
   const [editName, setEditName] = useState(false);
 
-
-  fetchforms(id)
-
   function toggleEdit() {
-    setEditName(!editName);
+    setEditName(!editName)
     onToggleOverlay && onToggleOverlay(!editName); 
   }
 
   const form = useForm<z.infer<typeof editNameSchema>>({
     resolver: zodResolver(editNameSchema),
-  });
+  })
 
+  // Corrigindo o useEffect para incluir 'form' e 'forms' como dependências
   useEffect(() => {
     if (forms) {
-      form.setValue("name", forms[selectedForm].name);
+      form.setValue("name", forms[selectedForm].name)
     }
-  }, [selectedForm]);
+  }, [selectedForm, forms, form]) // Incluindo 'forms' e 'form' como dependências
 
   function onSubmit(values: z.infer<typeof editNameSchema>) {
-    toggleEdit();
-    updateFormName(values.name);
+    toggleEdit()
+    updateFormName(values.name)
   }
 
   if (editName) {
@@ -51,15 +56,15 @@ export function FormNameEditor({ id, onToggleOverlay }) {
       <>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-4 rounded-md">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-4  rounded-md ">
+              <div className="flex items-center gap-2 ">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input {...field} className="focus:outline-none focus:ring-0 focus:border-transparent"/>
+                        <Input {...field} className="focus:outline-none focus:ring-0 focus:border-transparent" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -73,23 +78,24 @@ export function FormNameEditor({ id, onToggleOverlay }) {
           </form>
         </Form>
       </>
-    );
-  } else
+    )
+  } else {
     return (
       <>
         <div className="flex flex-col">
-          <h3 className="flex items-center gap-1 text-2xl font-semibold tracking-tight">
-            {forms && forms[selectedForm].name}
+          <h3 className="flex scroll-m-20 items-center gap-1  text-2xl font-semibold tracking-tight">
+            {forms && forms[selectedForm].name || ""}
             <BsPencil
               onClick={toggleEdit}
               className="mb-1 ml-1 cursor-pointer"
               size={22}
             />
           </h3>
-          <p className="text-lg text-blue-400">
-            {forms && forms[selectedForm].fields.length} Campos
+          <p className="text-lg text-blue-400 ">
+            {forms && forms[selectedForm].fields.length || 0} Fields
           </p>
         </div>
       </>
-    );
+    )
+  }
 }

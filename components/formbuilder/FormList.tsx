@@ -1,12 +1,13 @@
 import React from "react"
 
-import { FiTrash,FiPlus } from "react-icons/fi"
+import { FiTrash, FiPlus } from "react-icons/fi"
 
 import { Button } from "@/components/ui/button"
 import { useAppState } from "@/state/state"
 
 export function FormList(props: {}) {
-  const { forms, newForm, selectForm, deleteForm } = useAppState()
+  // Passando um id ao chamar useAppState
+  const { forms, newForm, selectForm, deleteForm } = useAppState("formId123")
   return (
     <ul className="flex flex-col gap-2 mt-20">
       {forms?.map((f, idx) => (
