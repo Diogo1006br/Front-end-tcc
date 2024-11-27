@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Crie uma instância do axios
 const api = axios.create({
-  baseURL: 'https://gdif.site/api',
+  baseURL: 'https://gdif.site/api/',
   withCredentials: true, // Permite envio automático de cookies com cada solicitação
 });
 
