@@ -155,7 +155,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
             <div className="flex items-center">
               <div className="w-16 h-16 rounded-md" style={{ backgroundColor: "#FFFFFF" }}>
                 <Image
-                  src={process.env.NEXT_PUBLIC_MEDIAURL + url}
+                  src={'https://gdif.site/api/' + url}
                   alt="Project Image"
                   width={64}  // Defina as dimensões da imagem
                   height={64}

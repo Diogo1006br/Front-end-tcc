@@ -22,7 +22,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_APIURL+'api/token/', {
+      const response = await fetch('https://gdif.site/api'+'api/token/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

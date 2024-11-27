@@ -75,7 +75,7 @@ export default function Users() {
   useEffect(() => {
     api.get("logeduser/").then((response) => {
       setUser(response.data);
-      setImageUrl(`${process.env.NEXT_PUBLIC_APIURL}${response.data.profileImage}`);
+      setImageUrl(`'https://gdif.site/api/'${response.data.profileImage}`);
       setUserPostData(response.data);
       console.log(response.data);
 
@@ -94,7 +94,7 @@ export default function Users() {
 
   async function fetchImageAndSetPostData(imagePath: string, userData: any) {
     try {
-      const imageUrl = `${process.env.NEXT_PUBLIC_APIURL}${imagePath}`;
+      const imageUrl = `'https://gdif.site/api/'${imagePath}`;
       const res = await fetch(imageUrl);
       const blob = await res.blob();
 

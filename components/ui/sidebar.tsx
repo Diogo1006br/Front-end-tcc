@@ -58,7 +58,7 @@ export function Sidebar() {
   useEffect(() => {
     api.get("logeduser/").then((response) => {
       setUser(response.data);
-      setImageUrl(`${process.env.NEXT_PUBLIC_APIURL}${response.data.profileImage}`);
+      setImageUrl(`'https://gdif.site/api/'${response.data.profileImage}`);
       console.log(response.data);
 
       if (response.data.profileImage) {
@@ -71,7 +71,7 @@ export function Sidebar() {
 
   async function fetchImageAndSetPostData(imagePath: string, userData: any) {
     try {
-      const imageUrl = `${process.env.NEXT_PUBLIC_APIURL}${imagePath}`;
+      const imageUrl = `'https://gdif.site/api/'${imagePath}`;
       const res = await fetch(imageUrl);
       const blob = await res.blob();
 

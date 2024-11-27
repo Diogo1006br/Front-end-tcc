@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Crie uma instância do axios
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_APIURL,
+  baseURL: 'https://gdif.site/api',
   withCredentials: true, // Permite envio automático de cookies com cada solicitação
 });
 
@@ -33,7 +33,7 @@ api.interceptors.response.use(response => {
   if (error.response.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true;
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_APIURL}api/token/refresh/`, {}, {
+      const response = await axios.post(`https://gdif.site/api/api/token/refresh/`, {}, {
         withCredentials: true
       });
 
