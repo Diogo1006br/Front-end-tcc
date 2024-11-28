@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Crie uma instância do axios
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_APIURL,
+  baseURL: `${process.env.NEXT_PUBLIC_APIURL}api/`, // Use variável de ambiente
   withCredentials: true, // Permite envio automático de cookies com cada solicitação
 });
 
