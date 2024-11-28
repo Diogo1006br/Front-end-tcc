@@ -224,15 +224,15 @@ export default function SystemHome() {
         <div className=" md:grid md:grid-cols-2 lg:grid lg:grid-cols-3 xl:grid xl:grid-cols-4">
         {Array.isArray(projects) && projects.map((project: Project) => (
         <ul key={project.id}>
-          <ProjectCard
-            project_name={project.projectName}
-            project_description={project.projectDescription}
-            project_image={process.env.NEXT_PUBLIC_MEDIAURL + project.image}
-            project_created_at={project.created_at}
-            project_link={`/sistema/projetos/${project.id}`}
-            project_delete={() => handleDeleteProject(project.id)}
-          />
-        </ul>
+        <ProjectCard
+          project_name={project.projectName}
+          project_description={project.projectDescription}
+          project_image={`${process.env.NEXT_PUBLIC_MEDIAURL}${project.image}`}
+          project_created_at={project.created_at}
+          project_link={`/sistema/projetos/${project.id}`}
+          project_delete={() => handleDeleteProject(project.id)}
+        />
+      </ul>
       ))}
         </div>
 

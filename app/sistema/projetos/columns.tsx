@@ -152,18 +152,18 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
 
         return (
           <Link href={`/sistema/projetos/${TableContent.id}`}>
-            <div className="flex items-center">
-              <div className="w-16 h-16 rounded-md" style={{ backgroundColor: "#FFFFFF" }}>
-                <Image
-                  src={'https://gdif.site/api/' + url}
-                  alt="Project Image"
-                  width={64}  // Defina as dimensões da imagem
-                  height={64}
-                  className="w-full h-full object-cover rounded-md"
-                />
-              </div>
+          <div className="flex items-center">
+            <div className="w-16 h-16 rounded-md" style={{ backgroundColor: "#FFFFFF" }}>
+              <Image
+                src={`${process.env.NEXT_PUBLIC_MEDIAURL}${url}`}
+                alt="Project Image"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover rounded-md"
+              />
             </div>
-          </Link>
+          </div>
+        </Link>
         );
       },
     },

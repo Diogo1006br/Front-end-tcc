@@ -75,45 +75,40 @@ export default function Users() {
   useEffect(() => {
     api.get("logeduser/").then((response) => {
       setUser(response.data);
-      setImageUrl(`'https://gdif.site/api/'${response.data.profileImage}`);
+      setImageUrl(`${process.env.NEXT_PUBLIC_APIURL}${response.data.profileImage}`);
       setUserPostData(response.data);
       console.log(response.data);
-
+  
       if (response.data.profileImage) {
         fetchImageAndSetPostData(response.data.profileImage, response.data);
       }
     });
-
+  
     setToastMessage({
       title: "Dica",
       description: "Após terminar de colocar seus dados, clique no botão Salvar.",
       variant: "default",
     });
   }, []);
-
-
+  
   async function fetchImageAndSetPostData(imagePath: string, userData: any) {
     try {
-      const imageUrl = `'https://gdif.site/api/'${imagePath}`;
+      const imageUrl = `${process.env.NEXT_PUBLIC_APIURL}${imagePath}`;
       const res = await fetch(imageUrl);
       const blob = await res.blob();
-
-      // Extraia o nome do arquivo do caminho da imagem
+  
       const fileName = imagePath.split('/').pop() || "profileImage.jpg";
       const file = new File([blob], fileName, { type: blob.type });
-
-      // Crie um objeto FormData e adicione o arquivo
+  
       const formData = new FormData();
       formData.append("profileImage", file);
-
-      // Adicione outros dados do usuário ao FormData
+  
       Object.keys(userData).forEach((key) => {
         if (key !== "profileImage") {
           formData.append(key, userData[key]);
         }
       });
-
-      // Atualize o userPostData com os dados do usuário e a imagem
+  
       setUserPostData({
         ...userData,
         profileImage: file,
@@ -122,6 +117,7 @@ export default function Users() {
       console.error("Erro ao buscar a imagem:", error);
     }
   }
+  
 
 
   function UserUpdate(){
