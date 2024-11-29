@@ -1,31 +1,58 @@
-Este é um projeto Next.js iniciado com create-next-app.
+Passo a Passo - Front-end
+1. Pré-requisitos
+Certifique-se de ter os seguintes itens instalados:
 
-Começando
-Primeiro, inicie o servidor de desenvolvimento:
+Node.js (versão recomendada: 16 ou superior)
+npm ou Yarn (gerenciador de pacotes)
+2. Clonar o repositório
+Abra o terminal e clone o repositório do front-end:
+
+bash
+Copiar código
+git clone <url-do-repositorio-front-end>
+Substitua <url-do-repositorio-front-end> pela URL do repositório no GitHub.
+
+3. Navegar até o diretório do projeto
+bash
+Copiar código
+cd <nome-do-diretorio-clonado>
+4. Instalar as dependências
+Execute o seguinte comando para instalar todas as dependências necessárias:
+
+bash
+Copiar código
+npm install
+Esse comando irá baixar e configurar todas as bibliotecas especificadas no arquivo package.json.
+
+5. Configurar variáveis de ambiente
+Verifique se há um arquivo .env.example. Se sim, renomeie-o para .env e configure as variáveis necessárias, como por exemplo:
+
+env
+Copiar código
+NEXT_PUBLIC_APIURL=http://localhost:8000
+Se não houver, crie um arquivo .env com as variáveis de ambiente adequadas.
+
+6. Rodar o projeto
+Para iniciar o servidor de desenvolvimento:
 
 bash
 Copiar código
 npm run dev
-# ou
-yarn dev
-# ou
-pnpm dev
-# ou
-bun dev
-Abra http://localhost:3000 no seu navegador para ver o resultado.
+A aplicação estará disponível no navegador em:
 
-Você pode começar a editar a página modificando app/page.tsx. A página será atualizada automaticamente à medida que você edita o arquivo.
+arduino
+Copiar código
+http://localhost:3000
+7. Executar testes
+Se desejar rodar os testes:
 
-Este projeto utiliza next/font para otimizar e carregar automaticamente a fonte Inter, uma fonte personalizada do Google.
+bash
+Copiar código
+npm run test
+8. Gerar relatório de cobertura de testes
+Para gerar o relatório de cobertura:
 
-Aprenda Mais
-Para saber mais sobre Next.js, consulte os seguintes recursos:
-
-Documentação Next.js - aprenda sobre as funcionalidades e a API do Next.js.
-Aprenda Next.js - um tutorial interativo do Next.js.
-Você pode conferir o repositório do Next.js no GitHub - seu feedback e contribuições são bem-vindos!
-
-Implementação na Vercel
-A maneira mais fácil de implementar seu aplicativo Next.js é usar a Plataforma Vercel, criada pelos desenvolvedores do Next.js.
-
-Confira nossa documentação de implementação do Next.js para mais detalhes.
+bash
+Copiar código
+npm run test -- --coverage
+Os relatórios serão gerados na pasta coverage/.
