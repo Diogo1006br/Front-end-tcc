@@ -233,7 +233,6 @@ export function Preview({ id }: { id: any }) {
               {f.style === "select" && SelectField(f)}
               {f.style === "combobox" && ComboboxField(f)}
               {f.type === "file" && PhotoField(f)}
-              {f.type === "ElementForm" && ElemenetButtonField(f)}
             </React.Fragment>
           ))}
           <Button onClick={() => form.getValues()}>Salvar</Button>
@@ -516,27 +515,6 @@ export function Preview({ id }: { id: any }) {
     );
   }
 
-  //ElementButtonField
-  function ElemenetButtonField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="rounded-lg border p-4">
-            <FormLabel>{f.label}</FormLabel>
-            <FormControl>
-              <Link href={`/sistema/subitem/${f.element}/${f.form}`}>
-              <FormDescription>{f.desc}</FormDescription>
-                <Button>Formulário do Elemento</Button>
-              </Link>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    )
-  }
 
 }
 

@@ -48,8 +48,8 @@ const addColumnHover = (index: number, action: 'add' | 'remove') => {
 const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: boolean, setHasChanged: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const TableContent = row.original;
   const project_id = TableContent.id;
-  const NewStatusFiled = { status: "Arquivado" };
-  const NewStatusActive = { status: "Ativo" };
+  const NewStatusFiled = { status: "Pending" };
+  const NewStatusActive = { status: "In Progress" };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmCallback, setConfirmCallback] = useState<null | ((projectName: string) => void)>(null);
@@ -57,7 +57,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
   const handleArquivarClick = async () => {
     try {
-      await api.post(`change_project_status/${project_id}/`, NewStatusFiled, {
+      await api.patch(`change_project_status/${project_id}/`, NewStatusFiled, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -92,7 +92,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
   const handleAtivoClick = async () => {
     try {
-      await api.post(`change_project_status/${project_id}/`, NewStatusActive, {
+      await api.patch(`change_project_status/${project_id}/`, NewStatusActive, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -115,15 +115,6 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => handleDelete(TableContent.projectName)}>Deletar</DropdownMenuItem>
 
-        {TableContent.status !== "Arquivado" && (
-          <DropdownMenuItem onClick={handleArquivarClick}>Arquivar</DropdownMenuItem>
-        )}
-        {TableContent.status !== "Ativo" && (
-          <DropdownMenuItem onClick={handleAtivoClick}>Ativo</DropdownMenuItem>
-        )}
-        <Link href={`projetos/ProjetoConfig/${TableContent.id}`}>
-          <DropdownMenuItem>Configurações</DropdownMenuItem>
-        </Link>
       </DropdownMenuContent>
       <ConfirmDeleteDialog
         isOpen={isDialogOpen}
@@ -142,31 +133,6 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
 export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boolean, setHasChanged: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const columns: ColumnDef<TableContent>[] = [
-    {
-      accessorKey: "imagem",
-      accessorFn: (row) => `${row.image}`,
-      header: () => <div className="text-left"></div>,
-      cell: ({ row }) => {
-        const url: string = row.getValue("imagem");
-        const TableContent = row.original;
-
-        return (
-          <Link href={`/sistema/projetos/${TableContent.id}`}>
-          <div className="flex items-center">
-            <div className="w-16 h-16 rounded-md" style={{ backgroundColor: "#FFFFFF" }}>
-              <Image
-                src={`${process.env.NEXT_PUBLIC_MEDIAURL}${url}`}
-                alt="Project Image"
-                width={64}
-                height={64}
-                className="w-full h-full object-cover rounded-md"
-              />
-            </div>
-          </div>
-        </Link>
-        );
-      },
-    },
     {
       accessorKey: "Nome projeto",
       accessorFn: (row) => `${row.projectName}`,
@@ -205,19 +171,6 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         return (
           <Link href={`/sistema/projetos/${TableContent.id}`}>
             <div className="cursor-pointer">{TableContent.projectDescription}</div>
-          </Link>
-        );
-      },
-    },
-    {
-      accessorKey: "status",
-      header: () => <div className="text-left">Status</div>,
-      cell: ({ row }) => {
-        const TableContent = row.original;
-  
-        return (
-          <Link href={`/sistema/projetos/${TableContent.id}`}>
-            <div className="cursor-pointer">{TableContent.status}</div>
           </Link>
         );
       },

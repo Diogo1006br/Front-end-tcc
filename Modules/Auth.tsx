@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Crie uma instância do axios
 const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_APIURL}api/`, // Use variável de ambiente
+  baseURL: `${process.env.NEXT_PUBLIC_APIURL}/`, // Use variável de ambiente
   withCredentials: true, // Permite envio automático de cookies com cada solicitação
 });
 
@@ -33,8 +33,7 @@ api.interceptors.response.use(response => {
   if (error.response.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true;
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_APIURL}api/token/refresh/`, {}, {
-        withCredentials: true
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_APIURL}token/refresh/`, {}, {
       });
 
       if (response.status === 200) {
@@ -50,7 +49,6 @@ api.interceptors.response.use(response => {
       if ((refreshError as any).response && (refreshError as any).response.status === 401) {
         console.log('Token expirado');
         // Redirecionar para a página de login
-        window.location.href = '/login';
       }
     }
   }

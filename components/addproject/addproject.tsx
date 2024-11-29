@@ -26,7 +26,7 @@ import { set } from 'date-fns';
 
 
 export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (value: boolean) => void, hasChanged: boolean}) {
-  const [emailSuggestions, setEmailSuggestions] = useState<{ results: { email: string }[] } | null>(null);
+  const [emailSuggestions, setEmailSuggestions] = useState<any | null>(null);
 
   const [NewProjectFormData, setNewProjectFormData] = useState({
     projectName: '',
@@ -56,10 +56,10 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     const normalizedInput = inputValue.trim().toLowerCase();
     if (!normalizedInput) return [];
     // Assume que emailSuggestions é um objeto com uma propriedade results que é um array
-    const suggestionsArray = emailSuggestions?.results || [];
+    const suggestionsArray = emailSuggestions || [];
     return suggestionsArray
-      .filter(email => email.email.toLowerCase().includes(normalizedInput))
-      .map(email => email.email);
+      .filter((email: any) => email.email.toLowerCase().includes(normalizedInput))
+      .map((email: any) => email.email);
   };
 
   const validateEmail = (email: string) => {
@@ -84,7 +84,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     }
 
     // Verifica se emailSuggestions está vazio antes de usar map
-    const suggestedEmails = emailSuggestions && emailSuggestions.results.length > 0 ? emailSuggestions.results.map(email => email.email.toLowerCase()) : [];
+    const suggestedEmails = emailSuggestions && emailSuggestions.length > 0 ? emailSuggestions.map((email: any) => email.email.toLowerCase()) : [];
 
     if (value && suggestedEmails.includes(value.toLowerCase())) {
       setNewProjectFormData(prev => ({
@@ -139,7 +139,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
         setToastMessage({ title: 'Erro', description: 'Formato de email inválido.', variant: 'destructive' });
         return;
       }
-      const suggestedEmails = emailSuggestions && emailSuggestions.results.length > 0 ? emailSuggestions.results.map(email => email.email.toLowerCase()) : [];
+      const suggestedEmails = emailSuggestions && emailSuggestions.length > 0 ? emailSuggestions.map((email: any) => email.email.toLowerCase()) : [];
       if (value && suggestedEmails.includes(value.toLowerCase())) {
         setNewProjectFormData(prev => ({
           ...prev,

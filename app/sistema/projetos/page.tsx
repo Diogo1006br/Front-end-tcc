@@ -222,8 +222,6 @@ export default function Projects() {
                     <Tabs defaultValue="active">
                         <TabsList>
                             <TabsTrigger value="all">Todos</TabsTrigger>
-                            <TabsTrigger value="active">Ativos</TabsTrigger>
-                            <TabsTrigger value="archived">Arquivados</TabsTrigger>
                         </TabsList>
                         <TabsContent value="all">
                             <Card x-chunk="dashboard-06-chunk-0" className="h-full w-full">

@@ -23,7 +23,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_APIURL+'api/token/', {
+      const response = await fetch(process.env.NEXT_PUBLIC_APIURL+'token/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,6 +37,7 @@ export default function Login() {
       if (response.status === 200) {
         setTimeout(() => setLoading(false), 1000);
         console.log(data);
+        localStorage.setItem('accessToken', data.access);
         window.location.href = '/sistema';
       } else {
         setTimeout(() => setLoading(false), 1000);

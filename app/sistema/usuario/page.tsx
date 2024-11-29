@@ -49,7 +49,6 @@ export default function Users() {
   const [user, setUser] = useState({
     id: "",
     email: "",
-    company: "",
     firstName: "",
     lastName: "",
     companyPosition: "",
@@ -60,7 +59,6 @@ export default function Users() {
   });
   const [userPostData, setUserPostData] = useState({
     email: "",
-    company: "",
     firstName: "",
     lastName: "",
     companyPosition: "",
@@ -73,22 +71,44 @@ export default function Users() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    api.get("logeduser/").then((response) => {
-      setUser(response.data);
-      setImageUrl(`${process.env.NEXT_PUBLIC_APIURL}${response.data.profileImage}`);
-      setUserPostData(response.data);
-      console.log(response.data);
-  
-      if (response.data.profileImage) {
-        fetchImageAndSetPostData(response.data.profileImage, response.data);
-      }
-    });
   
     setToastMessage({
       title: "Dica",
       description: "Após terminar de colocar seus dados, clique no botão Salvar.",
       variant: "default",
     });
+  }, []);
+
+  useEffect(() => {
+    try {
+      api.get('users/').then(response => {
+        const userdale = response.data.filter(userD => userD.id == 2)[0];
+
+        setUser({
+          id: userdale.id,
+          email: userdale.email,
+          firstName: userdale.firstName,
+          lastName: userdale.lastName,
+          CPF: userdale.CPF,
+          phone: userdale.phone,
+          birthDate: userdale.birthDate,
+          profileImage: null as File | null,
+          companyPosition: userdale.companyPosition
+        });
+        setUserPostData({
+          email: userdale.email,
+          firstName: userdale.firstName,
+          lastName: userdale.lastName,
+          CPF: userdale.CPF,
+          phone: userdale.phone,
+          birthDate: userdale.birthDate,
+          profileImage: null as File | null,
+          companyPosition: userdale.companyPosition
+        });
+      });
+    } catch (error) {
+      console.error('Erro ao buscar sugestões de email:', error);
+    }
   }, []);
   
   async function fetchImageAndSetPostData(imagePath: string, userData: any) {
@@ -118,8 +138,6 @@ export default function Users() {
     }
   }
   
-
-
   function UserUpdate(){
     api.put(`logeduser/${user.id}/`, userPostData, {
       headers: {
@@ -269,8 +287,6 @@ export default function Users() {
                   <div className="mt-10">
                     {user.firstName} {user.lastName}
                   </div>
-                  <Button className="mt-10" onClick={UserUpdate}>Salvar</Button>
-
                   <Button className="mt-10" onClick={Logout}> Fazer Logout <LogOut className="ml-4" /></Button>
                 </div>
               </div>
@@ -280,7 +296,7 @@ export default function Users() {
                   <Label className="font-bold" htmlFor="nome">Nome</Label>
                   <Input
                     type="string"
-                    id="nome"
+                    id="firstName"
                     value={user.firstName}
                     onChange={(e) => {
                       const newValue = e.target.value;
@@ -395,8 +411,7 @@ export default function Users() {
 
               <div className="col-start-4 row-start-3 space-y-4">
                 <div className="grid w-full max-w-sm items-center gap-1.5">
-                  <Label className="font-bold" htmlFor="empresa">Empresa</Label>
-                  {user.company}
+
                 </div>
               </div>
             </div>

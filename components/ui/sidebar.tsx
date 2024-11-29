@@ -55,17 +55,6 @@ export function Sidebar() {
   });
 
   //Hooks
-  useEffect(() => {
-    api.get("logeduser/").then((response) => {
-      setUser(response.data);
-      setImageUrl(`${process.env.NEXT_PUBLIC_APIURL}${response.data.profileImage}`);
-      console.log(response.data);
-  
-      if (response.data.profileImage) {
-        fetchImageAndSetPostData(response.data.profileImage, response.data);
-      }
-    });
-  }, []);
   
   async function fetchImageAndSetPostData(imagePath: string, userData: any) {
     try {
