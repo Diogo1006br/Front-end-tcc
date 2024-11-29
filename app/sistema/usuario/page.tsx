@@ -82,7 +82,7 @@ export default function Users() {
   useEffect(() => {
     try {
       api.get('users/').then(response => {
-        const userdale = response.data.filter(userD => userD.id == 2)[0];
+        const userdale = response.data.filter((userD: any) => userD.id == 2)[0];
 
         setUser({
           id: userdale.id,
