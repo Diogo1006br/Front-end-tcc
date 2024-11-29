@@ -145,7 +145,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
   };
 
   useEffect(() => {
-    api.get(`actionsperitem/`, {
+    api.get(`/api/actionsperitem/`, {
       params: {
         object_id: params.asset,
         content_type: params.instance,
@@ -161,7 +161,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
   },[]);
 
   useEffect(() => {
-    api.get(`assets/`)
+    api.get(`/api/assets/`)
       .then((response) => {
         setAssets(response.data)
         console.log(response.data.results);
@@ -173,7 +173,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
 
   useEffect(() => {
     api
-      .get(`elements/`)
+      .get(`/api/elements/`)
       .then((response) => {
         setElement(response.data)
         console.log(response.data.results);
@@ -185,7 +185,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
 
   useEffect(() => {
     api
-      .get(`comments/`, {
+      .get(`/api/comments/`, {
         params: {
           object_id: params.asset,
           content_type: params.instance,
@@ -203,7 +203,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
 
   useEffect(() => {
     try {
-      api.get('users/').then(response => setEmailSuggestions(response.data));
+      api.get('/api/users/').then(response => setEmailSuggestions(response.data));
     }
   
     catch (error) {
@@ -246,7 +246,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
     if (shouldPostComment) {
       console.log("Actions to be posted", commentsPostData);
       api
-        .post(`comments/`, commentsPostData, {
+        .post(`/api/comments/`, commentsPostData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -279,7 +279,7 @@ export default function ImageUploader({ fileKey, file, params, setFile }: { file
   useEffect(() => {
     if (isReadyToPost && actionsPostData) {
       console.log("Actions to be posted", actionsPostData);
-      api.post(`actions/`, actionsPostData, {
+      api.post(`/api/actions/`, actionsPostData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

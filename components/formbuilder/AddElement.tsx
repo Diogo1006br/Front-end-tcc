@@ -71,7 +71,7 @@ export default function AddElement({ forms, asset }: AddElementProps) {
           console.log('asset:',asset);
           const formDataWithAsset = { ...NewElementFormData, asset: asset };
           console.log('NewElementFormData:',formDataWithAsset);
-          await api.post('elements/', formDataWithAsset, {
+          await api.post('/api/elements/', formDataWithAsset, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },

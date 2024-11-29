@@ -105,7 +105,7 @@ export const FormBuilder: React.FC<FormBuilderEditorProps> = ({ id }) => {
   }, [form, updateFormFields]);
 
   useEffect(() => {
-    api.get("dropboxanswers/")
+    api.get("/api/dropboxanswers/")
       .then((response) => {
         setEnumList(response.data);
         console.log(response.data);
@@ -116,7 +116,7 @@ export const FormBuilder: React.FC<FormBuilderEditorProps> = ({ id }) => {
   }, [hasChanged]);
 
   useEffect(() => {
-    api.get("elements/")
+    api.get("/api/elements/")
       .then((response) => {
         setElementFormList(response.data);
         console.log(response.data);
@@ -162,7 +162,7 @@ export const FormBuilder: React.FC<FormBuilderEditorProps> = ({ id }) => {
     localStorage.setItem("projectData", JSON.stringify(postdata));
 
     try {
-      api.post("dropboxanswers/", JSON.stringify(postdata), {
+      api.post("/api/dropboxanswers/", JSON.stringify(postdata), {
         headers: {
           "Content-Type": "application/json",
         },

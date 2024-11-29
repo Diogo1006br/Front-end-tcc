@@ -44,7 +44,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
 
   useEffect(() => {
     try {
-      api.get('users/').then(response => setEmailSuggestions(response.data));
+      api.get('/api/users/').then(response => setEmailSuggestions(response.data));
     }
   
     catch (error) {
@@ -155,7 +155,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     }
 
     try {
-      const response = await api.post('projects/', NewProjectFormData, {
+      const response = await api.post('/api/projects/', NewProjectFormData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -95,7 +95,7 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
   }, [formFields, selectedForm, form]);
 
   useEffect(() => {
-    api.get(`forms/`)
+    api.get(`/api/forms/`)
       .then(response => {
         setAllForm(response.data);
       })
@@ -105,7 +105,7 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
   }, []);
 
   useEffect(() => {
-    api.get("form-responses/", {
+    api.get("/api/form-responses/", {
       params: {
         formID: params.id,
         Asset: params.asset,
@@ -208,12 +208,12 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
       };
 
       try {
-        const response = await api.post(`/form-responses/`, values);
+        const response = await api.post(`/api/form-responses/`, values);
 
         if (response.status === 200) {
           toast.success("Resposta enviada com sucesso.");
 
-          const updatedFormResponse = await api.get("form-responses/", {
+          const updatedFormResponse = await api.get("/api/form-responses/", {
             params: {
               formID: params.id,
               Asset: params.asset,

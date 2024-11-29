@@ -109,7 +109,7 @@ export function Preview({ id }: { id: any }) {
 
     if(id !== undefined){
       try {
-        const response = await api.put(`/forms/${id}/`, values);
+        const response = await api.put(`/api/forms/${id}/`, values);
         resetForms();
         if (response.status === 200) {
           setToastMessage({ title: 'Sucesso', description: 'Formulário criado com sucesso.', variant: 'default' });
@@ -125,7 +125,7 @@ export function Preview({ id }: { id: any }) {
       }
     }else{
       try {
-        const response = await api.post('/forms/', values);
+        const response = await api.post('/api/forms/', values);
         console.log(values);
         console.log(response.data);
         resetForms()
