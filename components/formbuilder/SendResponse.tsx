@@ -323,7 +323,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
                 </Command>
               </PopoverContent>
             </Popover>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormDescription>{f.desc}</FormDescription>
             <FormMessage />
           </FormItem>
@@ -355,7 +354,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
               </SelectContent>
             </Select>
             <FormDescription>{f.desc}</FormDescription>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormMessage />
           </FormItem>
         )}
@@ -388,7 +386,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
                 ))}
               </RadioGroup>
             </FormControl>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormDescription>{f.desc}</FormDescription>
             <FormMessage />
           </FormItem>
@@ -408,7 +405,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
             <FormControl>
               <Switch checked={field.value} onCheckedChange={field.onChange} required={f.required} />
             </FormControl>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormDescription>{f.desc}</FormDescription>
           </FormItem>
         )}
@@ -453,7 +449,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
                 />
               </PopoverContent>
             </Popover>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormDescription>{f.desc}</FormDescription>
             <FormMessage />
           </FormItem>
@@ -473,7 +468,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
             <FormControl>
               <Input type="number" placeholder={f.placeholder} {...field} required={f.required} onChange={field.onChange} />
             </FormControl>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormDescription>{f.desc}</FormDescription>
             <FormMessage />
           </FormItem>
@@ -508,7 +502,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
                 />
               )}
             </FormControl>
-            <ImageUploader fileKey={f.key} file={file} params={params} setFile={setFile} />
             <FormDescription>{f.desc}</FormDescription>
             <FormMessage />
           </FormItem>
