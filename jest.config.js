@@ -13,8 +13,7 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   transform: {
-    "^.+\\.tsx?$": "ts-jest", // Para arquivos .ts e .tsx
-    "^.+\\.[t|j]sx?$": "babel-jest", // Para arquivos JS/TSX com Babel
+    "^.+\\.(ts|tsx)$": "@swc/jest", // Use @swc/jest para arquivos TypeScript
   },
   transformIgnorePatterns: [
     "/node_modules/(?!@nanostores).+\\.js$", // Permite a transformação de @nanostores
@@ -22,12 +21,12 @@ const customJestConfig = {
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   collectCoverage: true, // Ativa a coleta de cobertura
   coverageDirectory: "coverage", // Diretório para salvar os relatórios
-  coverageReporters: ["lcov", "text", "html"], // Relatórios em LCOV, texto e HTML
+  coverageReporters: ["lcov", "text", "html"], // Relatórios nos formatos LCOV, texto e HTML
   testMatch: [
     "**/__tests__/**/*.[jt]s?(x)", // Testes na pasta __tests__
     "**/?(*.)+(spec|test).[tj]s?(x)", // Testes com .spec ou .test
   ],
-  roots: ["<rootDir>/"], // Garante que ele busque testes na raiz do projeto
+  roots: ["<rootDir>/"], // Garante que os testes sejam encontrados na raiz do projeto
 };
 
 module.exports = createJestConfig(customJestConfig);
