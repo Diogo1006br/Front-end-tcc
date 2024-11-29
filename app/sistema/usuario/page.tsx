@@ -81,7 +81,7 @@ export default function Users() {
 
   useEffect(() => {
     try {
-      api.get('users/').then(response => {
+      api.get('/api/users/').then(response => {
         const userdale = response.data.filter((userD: any) => userD.id == 2)[0];
 
         setUser({
@@ -139,7 +139,7 @@ export default function Users() {
   }
   
   function UserUpdate(){
-    api.put(`logeduser/${user.id}/`, userPostData, {
+    api.put(`/api/logeduser/${user.id}/`, userPostData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -163,7 +163,7 @@ export default function Users() {
   }
 
   function Logout(){
-    api.get(`logout/` ,{
+    api.get(`/api/logout/` ,{
       headers: {
         'Content-Type': 'multipart/form-data',
     },

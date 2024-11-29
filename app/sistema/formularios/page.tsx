@@ -48,7 +48,7 @@ import {
 //Imports Functions
 async function getForms(): Promise<TableContent[]> {
     try {
-        const response = await api.get('/forms/');
+        const response = await api.get('/api/forms/');
         console.log(response.data);
         return response.data;
     } catch (error) {

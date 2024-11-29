@@ -35,7 +35,7 @@ export default function Asset({ params }: Props) {
         const ativoId = Array.isArray(params.ativo) ? params.ativo[params.ativo.length - 1] : params.ativo;
 
         // Buscar ativo
-        const assetResponse = await api.get(`assets/${ativoId}`);
+        const assetResponse = await api.get(`/api/assets/${ativoId}`);
         setAsset(assetResponse.data);
       } catch (err) {
         console.error("Erro ao buscar dados:", err);

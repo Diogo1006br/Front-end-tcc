@@ -92,7 +92,7 @@ const CellActions = ({ row }: { row: Row<TableContent> }) => {
     localStorage.setItem('projectData', JSON.stringify(postData));
 
     try {
-      const response = await api.put(`/dropboxanswers/${TableContent.id}/`, JSON.stringify(postData), {
+      const response = await api.put(`/api/dropboxanswers/${TableContent.id}/`, JSON.stringify(postData), {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -130,7 +130,7 @@ const CellActions = ({ row }: { row: Row<TableContent> }) => {
       }
 
       try {
-        await api.delete(`/dropboxanswers/${TableContent.id}`, {
+        await api.delete(`/api/dropboxanswers/${TableContent.id}`, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

@@ -57,7 +57,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
   const handleArquivarClick = async () => {
     try {
-      await api.patch(`change_project_status/${project_id}/`, NewStatusFiled, {
+      await api.patch(`/api/change_project_status/${project_id}/`, NewStatusFiled, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -76,7 +76,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
       }
 
       try {
-        await api.delete(`/projects/${project_id}`, {
+        await api.delete(`/api/projects/${project_id}`, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -92,7 +92,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
   const handleAtivoClick = async () => {
     try {
-      await api.patch(`change_project_status/${project_id}/`, NewStatusActive, {
+      await api.patch(`/api/change_project_status/${project_id}/`, NewStatusActive, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

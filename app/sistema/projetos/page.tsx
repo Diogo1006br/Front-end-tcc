@@ -45,7 +45,7 @@ import {
 //Imports Functions
 async function getProjects(): Promise<TableContent[]> {
     try {
-        const response = await api.get('projects/');
+        const response = await api.get('/api/projects/');
         return response.data;
         
     } catch (error) {

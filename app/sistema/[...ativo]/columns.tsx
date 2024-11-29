@@ -41,7 +41,7 @@ const ActionCell = ({ row }: { row: { original: TableContent } }) => {
 
   const handleArquivarClick = async () => {
     try {
-      await api.post(`change_asset_status/${element_id}/`, { status: "Arquivado" }, {
+      await api.post(`/api/change_asset_status/${element_id}/`, { status: "Arquivado" }, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       window.location.reload();
@@ -58,7 +58,7 @@ const ActionCell = ({ row }: { row: { original: TableContent } }) => {
       }
 
       try {
-        await api.delete(`/projects/${element_id}`, {
+        await api.delete(`/api/projects/${element_id}`, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         window.location.reload();
@@ -72,7 +72,7 @@ const ActionCell = ({ row }: { row: { original: TableContent } }) => {
 
   const handleAtivoClick = async () => {
     try {
-      await api.post(`change_asset_status/${element_id}/`, { status: "Ativo" }, {
+      await api.post(`/api/change_asset_status/${element_id}/`, { status: "Ativo" }, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       window.location.reload();

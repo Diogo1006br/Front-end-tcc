@@ -121,27 +121,27 @@ export default function SystemHome() {
 
   
   useEffect(() => {
-    api.get('recent_projects/')
+    api.get('/api/recent_projects/')
       .then(response => setProjects(response.data))
       .catch(error => console.error(error));
   }, [hasChanged]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await api.get('/forms/');
+      const response = await api.get('/api/forms/');
       setNewData(response.data);
     };
     fetchData();
   }, []);
 
   useEffect(() => {
-    api.get('form_numbers/')
+    api.get('/api/form_numbers/')
       .then(response => setFormNumber(response.data))
       .catch(error => console.error(error));
   }, []);
 
   useEffect(() => {
-    api.get('project_numbers/')
+    api.get('/api/project_numbers/')
       .then(response => setProjectNumber(response.data))
       .catch(error => console.error(error));
   }, [hasChanged]);
@@ -150,7 +150,7 @@ export default function SystemHome() {
   const handleAddProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await api.post('projects/', NewProjectFormData, {
+      const response = await api.post('/api/projects/', NewProjectFormData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setProjects([...projects, response.data]);
@@ -161,7 +161,7 @@ export default function SystemHome() {
 
   const handleDeleteProject = async (id: number) => {
     try {
-      await api.delete(`/projects/${id}`);
+      await api.delete(`/api/projects/${id}`);
       setProjects(projects.filter(project => project.id !== id));
     } catch (error) {
       console.error(error);

@@ -36,7 +36,7 @@ export default function Lista() {
    
     const fetchData = async () => {
       try {
-        const response = await api.get("dropboxanswers/");
+        const response = await api.get("/api/dropboxanswers/");
         setDropboxlist(response.data);
         console.log(response.data);
       } catch (error) {

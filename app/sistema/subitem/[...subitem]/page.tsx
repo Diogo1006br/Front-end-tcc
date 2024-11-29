@@ -76,7 +76,7 @@ const ActionCell: React.FC<{ row: any }> = ({ row }) => {
   const handleSave = () => {
     console.log("Actions", TableContent);
     
-    api.put(`/actions/${TableContent.id}/`, TableContent, {
+    api.put(`/api/actions/${TableContent.id}/`, TableContent, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -165,11 +165,11 @@ export default function Asset({ params }: Props) {
 
   // Hooks
   useEffect(() => {
-    api.get(`elements/${params.subitem[0]}`)
+    api.get(`/api/elements/${params.subitem[0]}`)
       .then(response => {
         setSubitem(response.data);
 
-        api.get(`forms/${response.data.form}`)
+        api.get(`/api/forms/${response.data.form}`)
           .then(response => {
             setForm(response.data);
             console.log("FORMS", response.data.form);
@@ -193,7 +193,7 @@ export default function Asset({ params }: Props) {
         for (const key of Object.keys(form.form)) {
           const item = form.form[key];
           try {
-            const response = await api.get('images/', {
+            const response = await api.get('/api/images/', {
               params: {
                 questionkey: item.key,
                 content_type: 'Asset',

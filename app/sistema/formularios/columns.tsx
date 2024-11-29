@@ -49,7 +49,7 @@ const ActionCell = ({ row }: { row: any }) => {
 
   const handleArquivarClick = async () => {
     try {
-      await api.post(`change_form_status/${form_id}/`, NewStatusFiled, {
+      await api.post(`/api/change_form_status/${form_id}/`, NewStatusFiled, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -62,7 +62,7 @@ const ActionCell = ({ row }: { row: any }) => {
 
   const handleAtivoClick = async () => {
     try {
-      await api.post(`change_form_status/${form_id}/`, NewStatusActive, {
+      await api.post(`/api/change_form_status/${form_id}/`, NewStatusActive, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -81,7 +81,7 @@ const ActionCell = ({ row }: { row: any }) => {
       }
 
       try {
-        const response = await api.delete(`/forms/${form_id}`, {
+        const response = await api.delete(`/api/forms/${form_id}`, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

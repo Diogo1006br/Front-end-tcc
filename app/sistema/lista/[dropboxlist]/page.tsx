@@ -39,7 +39,7 @@ export default function Dropboxlist({ params }: Props) {
   useEffect(() => {
     console.log('rodou useEffect');
     // Para fazer uma solicitação GET
-    api.get(`dropboxanswers/${params.dropboxlist}`)
+    api.get(`/api/dropboxanswers/${params.dropboxlist}`)
       .then(response => {
         setDropboxlist(response.data);
         console.log('Api data', response.data);
