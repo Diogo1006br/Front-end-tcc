@@ -1,58 +1,76 @@
-Passo a Passo - Front-end
-1. Pré-requisitos
-Certifique-se de ter os seguintes itens instalados:
-
-Node.js (versão recomendada: 16 ou superior)
-npm ou Yarn (gerenciador de pacotes)
-2. Clonar o repositório
-Abra o terminal e clone o repositório do front-end:
-
-bash
+FRONT-END: Configuração Completa
+markdown
 Copiar código
-git clone <url-do-repositorio-front-end>
-Substitua <url-do-repositorio-front-end> pela URL do repositório no GitHub.
+# Configuração do Front-end
 
-3. Navegar até o diretório do projeto
+Este guia descreve como configurar e executar o projeto de front-end.
+
+---
+
+## Pré-requisitos
+
+Certifique-se de ter os seguintes softwares instalados:
+
+- [Node.js](https://nodejs.org/) (versão recomendada: 16 ou superior)
+- [npm](https://www.npmjs.com/) ou [Yarn](https://yarnpkg.com/)
+
+---
+
+## Passo a Passo
+
+### 1. Clonar o Repositório
+Clone o repositório do projeto usando o comando abaixo:
+```bash
+git clone <url-do-repositorio-front-end>
+2. Navegar para o Diretório do Projeto
+Entre no diretório do projeto clonado:
+
 bash
 Copiar código
 cd <nome-do-diretorio-clonado>
-4. Instalar as dependências
-Execute o seguinte comando para instalar todas as dependências necessárias:
+3. Instalar as Dependências
+Instale todas as dependências necessárias para o projeto:
 
 bash
 Copiar código
 npm install
-Esse comando irá baixar e configurar todas as bibliotecas especificadas no arquivo package.json.
-
-5. Configurar variáveis de ambiente
-Verifique se há um arquivo .env.example. Se sim, renomeie-o para .env e configure as variáveis necessárias, como por exemplo:
+4. Configurar as Variáveis de Ambiente
+Renomeie o arquivo .env.example para .env (se existir) e preencha as variáveis necessárias. Exemplo:
 
 env
 Copiar código
 NEXT_PUBLIC_APIURL=http://localhost:8000
-Se não houver, crie um arquivo .env com as variáveis de ambiente adequadas.
-
-6. Rodar o projeto
-Para iniciar o servidor de desenvolvimento:
+5. Rodar o Servidor de Desenvolvimento
+Inicie o servidor de desenvolvimento com o comando:
 
 bash
 Copiar código
 npm run dev
-A aplicação estará disponível no navegador em:
+Acesse o projeto no navegador em: http://localhost:3000.
 
-arduino
-Copiar código
-http://localhost:3000
-7. Executar testes
-Se desejar rodar os testes:
+Rodando Testes
+6. Rodar Testes Automatizados
+Para rodar os testes:
 
 bash
 Copiar código
 npm run test
-8. Gerar relatório de cobertura de testes
-Para gerar o relatório de cobertura:
+7. Gerar Relatórios de Cobertura de Testes
+Para gerar relatórios de cobertura:
 
 bash
 Copiar código
 npm run test -- --coverage
-Os relatórios serão gerados na pasta coverage/.
+Comandos Úteis
+Iniciar o servidor de desenvolvimento:
+bash
+Copiar código
+npm run dev
+Executar os testes:
+bash
+Copiar código
+npm run test
+Gerar relatório de cobertura de testes:
+bash
+Copiar código
+npm run test -- --coverage
