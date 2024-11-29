@@ -148,7 +148,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const TableContent = row.original;
 
         return (
-          <Link href={`/api/sistema/projetos/${TableContent.id}`}>
+          <Link href={`/sistema/projetos/${TableContent.id}`}>
             <div 
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
@@ -169,7 +169,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const TableContent = row.original;
   
         return (
-          <Link href={`/api/sistema/projetos/${TableContent.id}`}>
+          <Link href={`/sistema/projetos/${TableContent.id}`}>
             <div className="cursor-pointer">{TableContent.projectDescription}</div>
           </Link>
         );
@@ -185,7 +185,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const TableContent = row.original;
   
         return (
-          <Link href={`/api/sistema/projetos/${TableContent.id}`}>
+          <Link href={`/sistema/projetos/${TableContent.id}`}>
             <div className="cursor-pointer">{TableContent.owner}</div>
           </Link>
         );
@@ -201,7 +201,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const date = new Date(row.getValue("Data Criação")).toLocaleDateString();
         const TableContent = row.original;
         return (
-          <Link href={`/api/sistema/projetos/${TableContent.id}`}>
+          <Link href={`/sistema/projetos/${TableContent.id}`}>
             <div className="text-left">{date}</div>
           </Link>
         );
@@ -217,7 +217,7 @@ export const createColumns = ({ hasChanged, setHasChanged }: { hasChanged: boole
         const date = new Date(row.getValue("Data de modificação")).toLocaleDateString();
         const TableContent = row.original;
         return (
-          <Link href={`/api/sistema/projetos/${TableContent.id}`}>
+          <Link href={`/sistema/projetos/${TableContent.id}`}>
             <div className="text-left">{date}</div>
           </Link>
         );
