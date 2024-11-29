@@ -253,7 +253,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
             {f.style === "select" && SelectField(f)}
             {f.style === "combobox" && ComboboxField(f)}
             {f.type === "file" && PhotoField(f)}
-            {f.type === "ElementForm" && ElemenetButtonField(f)}
           </React.Fragment>
         ))}
         {error && (
