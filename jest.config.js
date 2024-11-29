@@ -22,7 +22,12 @@ const customJestConfig = {
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   collectCoverage: true, // Ativa a coleta de cobertura
   coverageDirectory: "coverage", // Diretório para salvar os relatórios
-  coverageReporters: ["lcov", "text", "html"], // Relatórios em LCOV e texto
+  coverageReporters: ["lcov", "text", "html"], // Relatórios em LCOV, texto e HTML
+  testMatch: [
+    "**/__tests__/**/*.[jt]s?(x)", // Testes na pasta __tests__
+    "**/?(*.)+(spec|test).[tj]s?(x)", // Testes com .spec ou .test
+  ],
+  roots: ["<rootDir>/"], // Garante que ele busque testes na raiz do projeto
 };
 
 module.exports = createJestConfig(customJestConfig);

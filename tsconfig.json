@@ -12,9 +12,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".", // Define a base para os caminhos relativos
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"] // Configura o alias para a raiz do projeto
+      "@/*": ["./*"]
     },
     "plugins": [
       {
@@ -22,6 +22,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
