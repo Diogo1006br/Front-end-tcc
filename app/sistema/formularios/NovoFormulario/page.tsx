@@ -88,7 +88,7 @@ class Form extends React.Component<Props, State> {
             <Card x-chunk="dashboard-06-chunk-0" className='relative z-50 p-4 bg-white shadow-lg'>
               <div className="flex items-center">
                   <CardHeader>
-                    <FormName id = {undefined}   onToggleOverlay={this.toggleOverlay} />
+                    <FormName id ={undefined}   onToggleOverlay={this.toggleOverlay} />
                   </CardHeader>
               </div>
             </Card>

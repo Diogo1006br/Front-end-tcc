@@ -102,7 +102,7 @@ export default function Projects({ params }: Props) {
 
     try {
       console.log(NewAssetFormData);
-      await api.post("assets/", NewAssetFormData, {
+      await api.post("/api/assets/", NewAssetFormData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -126,7 +126,7 @@ export default function Projects({ params }: Props) {
   // Incluindo params.projeto na lista de dependências do useEffect
   useEffect(() => {
     api
-      .get(`assets/`, {
+      .get(`/api/assets/`, {
         params: {
           project: params.projeto,
         },
@@ -142,7 +142,7 @@ export default function Projects({ params }: Props) {
   // Incluindo params.projeto na lista de dependências do useEffect
   useEffect(() => {
     api
-      .get(`projects/${params.projeto}`)
+      .get(`/api/projects/${params.projeto}`)
       .then((response) => {
         setProject(response.data);
         console.log(response.data);
@@ -155,7 +155,7 @@ export default function Projects({ params }: Props) {
   // Incluindo params.projeto na lista de dependências do useEffect
   useEffect(() => {
     api
-      .get(`asset_numbers/${params.projeto}/`)
+      .get(`/api/asset_numbers/${params.projeto}/`)
       .then((response) => {
         setAssetNumbers(response.data);
         console.log(response.data);
@@ -167,7 +167,7 @@ export default function Projects({ params }: Props) {
 
   useEffect(() => {
     api
-      .get(`forms/`)
+      .get(`/api/forms/`)
       .then((response) => {
         setForms(response.data);
         console.log(response.data);

@@ -40,7 +40,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
   const handleArquivarClick = async () => {
     try {
-      await api.post(`change_asset_status/${ativo_id}/`, NewStatusFiled, {
+      await api.post(`/api/change_asset_status/${ativo_id}/`, NewStatusFiled, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -59,7 +59,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
       }
 
       try {
-        await api.delete(`/assets/${ativo_id}`, {
+        await api.delete(`/api/assets/${ativo_id}`, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -76,7 +76,7 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
 
   const handleAtivoClick = async () => {
     try {
-      await api.post(`change_asset_status/${ativo_id}/`, NewStatusActive, {
+      await api.post(`/api/change_asset_status/${ativo_id}/`, NewStatusActive, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
