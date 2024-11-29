@@ -78,16 +78,3 @@ export function newPhotoField(): FormField {
   }
 }
 
-export function newElementFormField(): FormField {
-  return {
-    id: "id" + randNum(),
-    key: "key" + randNum(),
-    label: "Elemento",
-    desc: "Descrição",
-    placeholder: "",
-    type: "ElementForm",
-    required: false,
-    form: 1,
-    element: 1,
-  }
-}

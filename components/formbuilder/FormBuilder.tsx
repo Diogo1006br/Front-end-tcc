@@ -16,11 +16,9 @@ import { Type } from "@/components/formbuilder/FormType";
 import {
   newBooleanField,
   newDateField,
-  newEnumField,
   newNumberField,
   newStringField,
   newPhotoField,
-  newElementFormField,
 } from "@/utils/newField";
 
 import { Button } from "@/components/ui/button";
@@ -262,14 +260,12 @@ export const FormBuilder: React.FC<FormBuilderEditorProps> = ({ id }) => {
                     moreInfo,
                     form,
                     onfieldchange,
-                    enumlist,
                     setName,
                     inputs,
                     handleChangeInput,
                     handleRemoveInput,
                     handleAddInput,
                     handleSaveOptions,
-                    Elementformlist,
                     fields,
                     update,
                   })}

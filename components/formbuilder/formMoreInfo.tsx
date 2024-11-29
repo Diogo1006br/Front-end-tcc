@@ -84,14 +84,12 @@ export function MoreInfo({
     moreInfo,
     form,
     onfieldchange,
-    enumlist,
     setName,
     inputs,
     handleChangeInput,
     handleRemoveInput,
     handleAddInput,
     handleSaveOptions,
-    Elementformlist,
     fields,
     update,
   }: {
@@ -101,14 +99,12 @@ export function MoreInfo({
     moreInfo: any
     form: any
     onfieldchange: any
-    enumlist: any
     setName: any,
     inputs: any,
     handleChangeInput: any,
     handleRemoveInput: any,
     handleAddInput: any,
     handleSaveOptions: any,
-    Elementformlist: any,
     fields: any,
     update: any,
   }) {
@@ -316,149 +312,8 @@ export function MoreInfo({
             </TableCell>
           </TableRow>
         ) 
-      }else if (type === "ElementForm") {
-        return (
-          <TableRow className="border-b">
-            <td></td>
-            <TableCell
-              style={{ display: "table-cell" }}
-              colSpan={9}
-              className="flex flex-col gap-2"
-            >
-              <FormField
-                control={form.control}
-                name={`fields.${idx}.desc`}
-                render={({ field }) => (
-                  <FormItem className="py-1">
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Input className="w-1/2" {...field} 
-                      onChange={(e) => {
-                        console.log("e", e.target.value)
-                        form.setValue(`fields.${idx}.desc`, e.target.value);
-                        console.log(form.getValues("fields")[idx].desc)
-                        onfieldchange()
-                      }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-                  <FormField
-                    control={form.control}
-                    name={`fields.${idx}.enumName`}
-                    render={({ field }) => (
-                      <FormItem className="py-1">
-                        <FormLabel>Elemento a linkar</FormLabel>
-                        <FormControl>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-[200px] justify-between  flex",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? style.find(
-                                      (item) => item.value === field.value
-                                    )?.label
-                                  : "Select item"}
-                                <ChevronsUpDown
-                                  size={22}
-                                  className="ml-2 h-4 w-4 shrink-0 opacity-50"
-                                />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[200px] p-0">
-                            <Command>
-                              <CommandInput placeholder="Search types..." />
-                              <CommandEmpty>No type found.</CommandEmpty>
-                              <CommandGroup>
-                                <CommandList>
-                                {Elementformlist.map((formlist: { elementName: string; form: any; id: string }) => {
-                                    return (
-                                      <CommandItem
-                                        key={formlist.elementName} // use a chave do dicionário como key
-                                        value={formlist.elementName}
-                                        onSelect={() => {
-                                            form.setValue(`fields.${idx}.form`, formlist.form);
-                                            form.setValue(`fields.${idx}.element`, formlist.id);
-                                          onfieldchange()
-                                        }}
-                                      >
-                                        {formlist.elementName}
-                                      </CommandItem>
-                                    );
-                                  })}
-                                </CommandList>
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-              
-
-            </TableCell>
-          </TableRow>
-        )
-        
-      
-      }else {
+      } else {
         return <TableRow className="border-b">&nbsp;</TableRow>
       }
     } else return <></>
-
-    function EnumValues() {
-
-      console.log("enumvalues", form.getValues("fields")[idx].enumValues)
-
-      function deleteCurrentEnum(idx:number, idxx:number){
-       let enumValues = fields[idx].enumValues?.filter((val: { id: string; label: string; value: string }, index: number) => index !== idxx)
-       console.log("enumvalues", enumValues)
-       update(idx, {
-        ...form.getValues("fields")[idx],
-        enumValues,
-      })
-      }
-
-      return (
-        <div className="flex w-1/4 flex-col items-start gap-2">
-          <div className="flex flex-col">
-              <div className="flex items-center gap-3">
-                <Table className="min-w-full border-collapse table-auto p-0 m-0">
-                <TableHead className="p-0 m-0">
-                  <TableRow className="p-0 m-0">
-                    <TableCell className="p-0 m-0 text-left font-semibold border-0 whitespace-nowrap w-auto">
-                      Preview da Lista
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody className="p-0 m-0">
-                  {fields[idx].enumValues?.map((f: { id: string; label: string; value: string }, idxx: number) => (
-                    <TableRow key={f.id} className="p-0 m-0 border-0">
-                      <TableCell className="p-0 m-0 border-0">{f.label}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-             </div>
-           </div>
-          <div className="flex gap-4">
-            
-          </div>
-        </div>
-      )
-    }
   }
