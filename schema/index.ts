@@ -5,12 +5,10 @@ export const fieldTypes = [
   "number",
   "boolean",
   "date",
-  "enum",
   "file",
-  "ElementForm",
 ] as const;
 
-export type FieldTypes = "string" | "number" | "boolean" | "date" | "enum" | "file" | "ElementForm";
+export type FieldTypes = "string" | "number" | "boolean" | "date" | "file" ;
 
 export const types: { value: FieldTypes; label: string }[] = [
   {
@@ -26,20 +24,12 @@ export const types: { value: FieldTypes; label: string }[] = [
     label: "Boolean",
   },
   {
-    value: "enum",
-    label: "Enum",
-  },
-  {
     value: "date",
     label: "Date",
   },
   {
     value: "file",
     label: "File",
-  },
-  {
-    value: "ElementForm",
-    label: "Element Form",
   },
 ];
 
@@ -52,7 +42,7 @@ const fieldSchema = z.object({
   type: z.enum(fieldTypes),
   required: z.boolean(),
   defaultValue: z.union([z.string(), z.number(), z.boolean()]).optional(),
-  style: z.enum(["radio", "select", "combobox" , "file","ElementForm"]).optional(),
+  style: z.enum(["radio", "select", "combobox" , "file"]).optional(),
   enumValues: z
     .array(z.object({ label: z.string(), value: z.string(), id: z.string() }))
     .optional(),

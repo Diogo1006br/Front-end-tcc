@@ -71,9 +71,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
         case "date":
           schema[f.key] = z.date();
           break;
-        case "enum":
-          schema[f.key] = z.string();
-          break;
         case "file":
           schema[f.key] = z.any().refine(file => {
             if (file instanceof File) {
@@ -83,9 +80,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
           }, {
             message: "Invalid file type or size",
           });
-          break;
-        case "ElementForm":
-          schema[f.key] = z.number();
           break;
         default:
       }

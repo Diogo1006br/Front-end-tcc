@@ -188,18 +188,12 @@ export function Preview({ id }: { id: any }) {
         case "date":
           schema[f.key] = z.date().refine(date => !isNaN(date.getTime()), { message: 'Data inválida' });
           break;
-        case "enum":
-          schema[f.key] = z.string().min(1, { message: 'Campo obrigatório' });
-          break;
         case "file":
           schema[f.key] = z
             .any()
             .refine(file => file instanceof File && ["image/jpeg", "image/png"].includes(file.type), {
               message: "Tipo de arquivo inválido",
             });
-          break;
-        case "ElementForm":
-          schema[f.key] = z.number();
           break;
         default:
           break;

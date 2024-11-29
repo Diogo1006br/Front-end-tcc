@@ -32,12 +32,10 @@ import {
     "number",
     "boolean",
     "date",
-    "enum",
     "file",
-    "ElementForm",
     ] as const
     
-export type FieldTypes = "string" | "number" | "boolean" | "date" | "enum" | "file" | "ElementForm";
+export type FieldTypes = "string" | "number" | "boolean" | "date" |  "file";
 
 export function Type({ idx }: { idx: number }) {
     const types: { value: FieldTypes; label: string }[] = [
@@ -54,20 +52,12 @@ export function Type({ idx }: { idx: number }) {
         label: "Caixa de opção",
     },
     {
-        value: "enum",
-        label: "Lista",
-    },
-    {
         value: "date",
         label: "Data",
     },
     {
         value: "file",
         label: "Imagem",
-    },
-    {
-        value: "ElementForm",
-        label: "Elemento",
     },
     ]
     const form = useFormContext();

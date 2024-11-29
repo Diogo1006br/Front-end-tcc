@@ -47,7 +47,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 
-export type FieldTypes = "string" | "number" | "boolean" | "date" | "enum" | "file" | "ElementForm";
+export type FieldTypes = "string" | "number" | "boolean" | "date" | "file";
 
 const style: { value: "combobox" | "select" | "radio"; label: string }[] = [
   { value: "combobox", label: "ComboBox" },

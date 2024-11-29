@@ -51,20 +51,6 @@ export function newBooleanField(): FormField {
   }
 }
 
-export function newEnumField(): FormField {
-  return {
-    id: "id" + randNum(),
-    key: "key" + randNum(),
-    label: "Lista",
-    desc: "Descrição",
-    placeholder: "",
-    type: "enum",
-    style: "combobox",
-    enumName: "myEnum" + randNum(),
-    enumValues: [{ id: Date.now().toString(), label: "label", value: "value" }],
-    required: false,
-  }
-}
 
 export function newDateField(): FormField {
   return {
