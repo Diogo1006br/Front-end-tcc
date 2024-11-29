@@ -18,24 +18,31 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
 
+  
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Prevenir o comportamento padrão de envio do formulário
 
     setLoading(true);
     try {
-      const status = 200;
+      const response = await fetch(process.env.NEXT_PUBLIC_APIURL+'api/token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
 
-      if (status === 200) {
+      const data = await response.json();
+
+      if (response.status === 200) {
         setTimeout(() => setLoading(false), 1000);
         window.location.href = '/sistema';
       } else {
         setTimeout(() => setLoading(false), 1000);
-        setShowModal(true);
       }
     } catch (error) {
       console.error(error);
-      setMessage('Ocorreu um erro ao fazer login.');
-      setShowModal(true);
     }
   };
   
