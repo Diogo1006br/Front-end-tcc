@@ -78,7 +78,7 @@ function newForm(f: Form) {
 
 async function fetchforms(id: string, state: State) {
   try {
-    const response = await api.get(`/forms/${id}`)
+    const response = await api.get(`/api/forms/${id}`)
     console.log('Resposta:', response)
     const newState = {
       ...state,
