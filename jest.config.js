@@ -1,7 +1,7 @@
 const nextJest = require("next/jest");
 
 const createJestConfig = nextJest({
-  dir: "./", // Diretório da aplicação Next.js
+  dir: "./",
 });
 
 const customJestConfig = {
@@ -13,20 +13,20 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   transform: {
-    "^.+\\.(t|j)sx?$": "@swc/jest", // Usa SWC para testes
+    "^.+\\.(t|j)sx?$": "@swc/jest",
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!@nanostores).+\\.js$", // Permite a transformação de @nanostores
+    "/node_modules/(?!@nanostores).+\\.js$",
   ],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  collectCoverage: true, // Ativa a coleta de cobertura
-  coverageDirectory: "coverage", // Diretório para salvar os relatórios
-  coverageReporters: ["lcov", "text", "html"], // Relatórios em LCOV, texto e HTML
+  collectCoverage: true, // Ativa a cobertura
+  coverageDirectory: "coverage", // Diretório para relatórios
+  coverageReporters: ["lcov", "text", "html"],
   testMatch: [
-    "**/__tests__/**/*.[jt]s?(x)", // Testes na pasta __tests__
-    "**/?(*.)+(spec|test).[tj]s?(x)", // Testes com .spec ou .test
+    "**/__tests__/**/*.[jt]s?(x)",
+    "**/?(*.)+(spec|test).[tj]s?(x)",
   ],
-  roots: ["<rootDir>/"], // Busca testes na raiz do projeto
+  roots: ["<rootDir>/"], // Inclua todos os testes da raiz
 };
 
 module.exports = createJestConfig(customJestConfig);
