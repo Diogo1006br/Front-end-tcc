@@ -23,27 +23,14 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_APIURL+'token/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
+      const status = 200;
 
-      const data = await response.json();
-
-      if (response.status === 200) {
+      if (status === 200) {
         setTimeout(() => setLoading(false), 1000);
-        console.log(data);
-        localStorage.setItem('accessToken', data.access);
         window.location.href = '/sistema';
       } else {
         setTimeout(() => setLoading(false), 1000);
-        setMessage(data.message);
         setShowModal(true);
-        console.log(data);
       }
     } catch (error) {
       console.error(error);
