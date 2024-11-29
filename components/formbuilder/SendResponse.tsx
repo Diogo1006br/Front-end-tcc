@@ -28,7 +28,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import ImageUploader from "@/components/formbuilder/ImageUploader";
 import AddElement from "@/components/formbuilder/AddElement";
 
 // Utility function to conditionally join class names
