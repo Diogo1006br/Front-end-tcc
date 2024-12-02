@@ -235,40 +235,29 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     }
   }
 
-  return (
-    <Form {...form}>
-      <form
-        noValidate
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
-      >
-        {formFields.map((f) => (
-          <React.Fragment key={f.key}>
-            {f.type === "string" && StringField(f)}
-            {f.type === "number" && NumberField(f)}
-            {f.type === "date" && DateField(f)}
-            {f.type === "boolean" && BooleanField(f)}
-            {f.style === "radio" && RadioField(f)}
-            {f.style === "select" && SelectField(f)}
-            {f.style === "combobox" && ComboboxField(f)}
-            {f.type === "file" && PhotoField(f)}
-          </React.Fragment>
-        ))}
-        {error && (
-          <Alert className="">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>
-          Salvar
-        </Button>
-      </form>
-      <ToastContainer />
-    </Form>
-  );
-
   function ComboboxField(f: FF) {
+    const handleSelect = (key: string, value: string) => {
+      form.setValue(key, value);
+    };
+
+    const renderCommandItems = () => {
+      return (f.enumValues ?? []).map((item) => (
+        <CommandItem
+          value={item.label}
+          key={item.value}
+          onSelect={() => handleSelect(f.key, item.value)}
+        >
+          <Check
+            className={cn(
+              "mr-2 h-4 w-4",
+              item.value === form.getValues(f.key) ? "opacity-100" : "opacity-0"
+            )}
+          />
+          {item.label}
+        </CommandItem>
+      ));
+    };
+
     return (
       <FormField
         control={form.control}
@@ -284,7 +273,8 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
                   <Button
                     variant="outline"
                     role="combobox"
-                    className={cn("justify-between w-72 dark:bg-background dark:text-foreground",
+                    className={cn(
+                      "justify-between w-72 dark:bg-background dark:text-foreground",
                       !field.value ? "text-muted-foreground" : ""
                     )}
                   >
@@ -300,25 +290,7 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
                   <CommandInput placeholder={`Buscar em ${f.enumName}...`} required={f.required} />
                   <CommandEmpty>Não encontrado</CommandEmpty>
                   <CommandGroup>
-                    <CommandList>
-                      {f.enumValues?.map((item) => (
-                        <CommandItem
-                          value={item.label}
-                          key={item.value}
-                          onSelect={() => {
-                            form.setValue(f.key, item.value);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              item.value === field.value ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {item.label}
-                        </CommandItem>
-                      ))}
-                    </CommandList>
+                    <CommandList>{renderCommandItems()}</CommandList>
                   </CommandGroup>
                 </Command>
               </PopoverContent>
@@ -529,22 +501,39 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     );
   }
 
-  function ElemenetButtonField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="flex flex-col rounded-lg border p-4">
-            <FormLabel>{f.label}</FormLabel>
-            <FormControl>
-              <AddElement forms={formsAll} asset={asset} />
-            </FormControl>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
+
+
+  return (
+    <Form {...form}>
+      <form
+        noValidate
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+      >
+        {formFields.map((f) => (
+          <React.Fragment key={f.key}>
+            {f.type === "string" && StringField(f)}
+            {f.type === "number" && NumberField(f)}
+            {f.type === "date" && DateField(f)}
+            {f.type === "boolean" && BooleanField(f)}
+            {f.style === "radio" && RadioField(f)}
+            {f.style === "select" && SelectField(f)}
+            {f.style === "combobox" && ComboboxField(f)}
+            {f.type === "file" && PhotoField(f)}
+          </React.Fragment>
+        ))}
+        {error && (
+          <Alert className="">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
-      />
-    );
-  }
+        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>
+          Salvar
+        </Button>
+      </form>
+      <ToastContainer />
+    </Form>
+  );
 }
+
