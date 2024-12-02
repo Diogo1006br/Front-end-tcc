@@ -97,7 +97,6 @@ const ActionCell = ({ row, hasChanged, setHasChanged }: { row: any, hasChanged: 
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => handleDelete(TableContent.assetName)}>Deletar</DropdownMenuItem>
         {TableContent.status !== "Arquivado" && (
           <DropdownMenuItem onClick={handleArquivarClick}>Arquivar</DropdownMenuItem>
         )}
