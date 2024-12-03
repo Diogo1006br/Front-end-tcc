@@ -12,13 +12,11 @@ import { useRouter } from 'next/navigation'
 
 import { ptBR } from 'date-fns/locale';
 
-
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { cn } from "@/lib/utils"
 import { CommandList } from "cmdk"
 import { time } from "console"
-
 
 //Imports components
 import Link from "next/link"
@@ -85,10 +83,53 @@ import {
   Terminal,
 } from "lucide-react"
 
-
 //Imports types
 
+const handleApiResponse = (response: any, successMessage: string, errorMessage: string, router: any, resetForms: any, setToastMessage: any) => {
+  if (response.status === 200 || response.status === 201) {
+    setToastMessage({ title: 'Sucesso', description: successMessage, variant: 'default' });
+    resetForms();
+    setTimeout(() => {
+      router.push('/sistema/formularios/');
+    }, 1000);
+  } else {
+    setToastMessage({ title: 'Erro', description: errorMessage, variant: 'destructive' });
+  }
+};
 
+const handleApiError = (error: any, setToastMessage: any) => {
+  console.error(error);
+  setToastMessage({ title: 'Erro', description: 'Erro ao criar/editar formulário.', variant: 'destructive' });
+  if (error.response) {
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
+  } else if (error.request) {
+    console.log(error.request);
+  } else {
+    console.log('Error', error.message);
+  }
+};
+
+async function onSubmit(data: any, id: any, formFields: any, forms: any, selectedForm: any, router: any, resetForms: any, setToastMessage: any) {
+  let values = { ...formFields, name: forms[selectedForm].name };
+
+  if (id !== undefined) {
+    try {
+      const response = await api.put(`/api/forms/${id}/`, values);
+      handleApiResponse(response, 'Formulário criado com sucesso.', 'Erro ao criar formulário.', router, resetForms, setToastMessage);
+    } catch (error) {
+      handleApiError(error, setToastMessage);
+    }
+  } else {
+    try {
+      const response = await api.post('/api/forms/', values);
+      handleApiResponse(response, 'Formulário editado com sucesso.', 'Erro ao editar o formulário.', router, resetForms, setToastMessage);
+    } catch (error) {
+      handleApiError(error, setToastMessage);
+    }
+  }
+}
 
 export function Preview({ id }: { id: any }) {
   const { forms, selectedForm, resetForms } = useAppState(id);
@@ -102,60 +143,6 @@ export function Preview({ id }: { id: any }) {
     // const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   })
-
-  //Functions
-  async function onSubmit(data: any) {
-    let values = { ...formFields, name: forms[selectedForm].name };
-
-    if(id !== undefined){
-      try {
-        const response = await api.put(`/api/forms/${id}/`, values);
-        resetForms();
-        if (response.status === 200) {
-          setToastMessage({ title: 'Sucesso', description: 'Formulário criado com sucesso.', variant: 'default' });
-          setTimeout(() => {
-            router.push('/sistema/formularios/');
-          }, 1000);
-        } else {
-          setToastMessage({ title: 'Erro', description: 'Erro ao criar formulário.', variant: 'destructive' });
-        }
-      } catch (error) {
-        console.error(error);
-        setToastMessage({ title: 'Erro', description: 'Erro ao criar formulário.', variant: 'destructive' });
-      }
-    }else{
-      try {
-        const response = await api.post('/api/forms/', values);
-        console.log(values);
-        console.log(response.data);
-        resetForms()
-        if (response.status === 201) {
-          setToastMessage({ title: 'Sucesso', description: 'Formulario editado com sucesso.', variant: 'default' });
-          console.log("alertaaa",alert.message);
-          setTimeout(() => {
-            router.push('/sistema/formularios/');
-          }, 1000);
-        } else {
-          setToastMessage({ title: 'Erro', description: 'Erro ao editar o formulario.', variant: 'destructive' });
-        }
-      } catch (error) {
-        console.error(error);
-        if ((error as any).response) {
-            // O servidor retornou uma resposta que não é 2xx
-            console.log((error as any).response.data);
-            console.log((error as any).response.status);
-            console.log((error as any).response.headers);
-        } else if ((error as any).request) {
-            // A requisição foi feita, mas não houve resposta
-            console.log((error as any).request);
-        } else {
-            // Algo aconteceu na configuração da requisição que disparou um erro
-            console.log('Error', (error as any).message);
-        }
-      }
-
-    }
-  }
 
   //Hooks
   useEffect(() => {
@@ -205,16 +192,13 @@ export function Preview({ id }: { id: any }) {
     form.reset(newFormSchema);
   }, [formFields, selectedForm , form]);
   
-
-
-  
   return (
     <main>
     <ToastProvider>
       <Form {...form}>
         <form
           noValidate
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((data) => onSubmit(data, id, formFields, forms, selectedForm, router, resetForms, setToastMessage))}
           className="space-y-2 w-full"
         >
           {formFields.map((f) => (
@@ -508,10 +492,4 @@ export function Preview({ id }: { id: any }) {
       />
     );
   }
-
-
 }
-
-
-
-
