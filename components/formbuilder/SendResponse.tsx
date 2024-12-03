@@ -28,7 +28,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import AddElement from "@/components/formbuilder/AddElement";
 
 // Utility function to conditionally join class names
 function cn(...classes: string[]) {
@@ -37,7 +36,6 @@ function cn(...classes: string[]) {
 
 export function Sender({ params }: { params: { id: any; asset: string; instance: string } }) {
   const { id, asset, instance } = params;
-  const [formsAll, setAllForm] = useState([]);
   const { forms, selectedForm } = useAppStateEditor(id);
   const [error, setError] = useState<string>();
   const [file, setFile] = useState<{ [key: string]: File }>({});
@@ -90,7 +88,7 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
   useEffect(() => {
     api.get(`/api/forms/`)
       .then(response => {
-        setAllForm(response.data);
+        // Handle response if needed
       })
       .catch(error => {
         console.error(error);
@@ -501,8 +499,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     );
   }
 
-
-
   return (
     <Form {...form}>
       <form
@@ -536,4 +532,3 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     </Form>
   );
 }
-

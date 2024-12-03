@@ -70,14 +70,6 @@ export default function Users() {
   const [toastMessage, setToastMessage] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-  
-    setToastMessage({
-      title: "Dica",
-      description: "Após terminar de colocar seus dados, clique no botão Salvar.",
-      variant: "default",
-    });
-  }, []);
 
   useEffect(() => {
     try {
