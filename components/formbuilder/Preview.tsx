@@ -131,6 +131,34 @@ async function onSubmit(data: any, id: any, formFields: any, forms: any, selecte
   }
 }
 
+const createSchema = (formFields: any) => {
+  const schema: Record<string, any> = {};
+  formFields.forEach((f: any) => {
+    switch (f.type) {
+      case "string":
+        schema[f.key] = f.validation?.format === "email"
+          ? z.string().email({ message: 'Email inválido' }).min(1, { message: 'Campo obrigatório' }).max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` })
+          : z.string().min(1, { message: 'Campo obrigatório' }).max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
+        break;
+      case "number":
+        schema[f.key] = z.coerce.number().min(f.validation?.min || 1, { message: `Valor mínimo é ${f.validation?.min}` }).max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
+        break;
+      case "boolean":
+        schema[f.key] = z.boolean();
+        break;
+      case "date":
+        schema[f.key] = z.date().refine(date => !isNaN(date.getTime()), { message: 'Data inválida' });
+        break;
+      case "file":
+        schema[f.key] = z.any().refine(file => file instanceof File && ["image/jpeg", "image/png"].includes(file.type), { message: "Tipo de arquivo inválido" });
+        break;
+      default:
+        break;
+    }
+  });
+  return z.object(schema);
+};
+
 export function Preview({ id }: { id: any }) {
   const { forms, selectedForm, resetForms } = useAppState(id);
   //Variables
@@ -146,49 +174,7 @@ export function Preview({ id }: { id: any }) {
 
   //Hooks
   useEffect(() => {
-    const schema: Record<string, any> = {};
-    for (let f of formFields) {
-      switch (f.type) {
-        case "string":
-          if (f.validation?.format === "email") {
-            schema[f.key] = z
-              .string()
-              .email({ message: 'Email inválido' })
-              .min(1, { message: 'Campo obrigatório' })
-              .max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
-          } else {
-            schema[f.key] = z
-              .string()
-              .min(1, { message: 'Campo obrigatório' })
-              .max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
-          }
-          break;
-        case "number":
-          schema[f.key] = z
-            .coerce.number()
-            .min(f.validation?.min || 1, { message: `Valor mínimo é ${f.validation?.min}` })
-            .max(f.validation?.max || 9999999999, { message: `Valor máximo é ${f.validation?.max}` });
-          break;
-        case "boolean":
-          schema[f.key] = z.boolean();
-          break;
-        case "date":
-          schema[f.key] = z.date().refine(date => !isNaN(date.getTime()), { message: 'Data inválida' });
-          break;
-        case "file":
-          schema[f.key] = z
-            .any()
-            .refine(file => file instanceof File && ["image/jpeg", "image/png"].includes(file.type), {
-              message: "Tipo de arquivo inválido",
-            });
-          break;
-        default:
-          break;
-      }
-    }
-    
-    // Atualizar o esquema do formulário com o novo schema
-    const newFormSchema = z.object(schema);
+    const newFormSchema = createSchema(formFields);
     form.reset(newFormSchema);
   }, [formFields, selectedForm , form]);
   
@@ -203,14 +189,14 @@ export function Preview({ id }: { id: any }) {
         >
           {formFields.map((f) => (
             <React.Fragment key={f.key}>  {/* Adicionando a 'key' */}
-              {f.type === "string" && StringField(f)}
-              {f.type === "number" && NumberField(f)}
-              {f.type === "date" && DateField(f)}
-              {f.type === "boolean" && BooleanField(f)}
-              {f.style === "radio" && RadioField(f)}
-              {f.style === "select" && SelectField(f)}
-              {f.style === "combobox" && ComboboxField(f)}
-              {f.type === "file" && PhotoField(f)}
+              {f.type === "string" && StringField(f, form)}
+              {f.type === "number" && NumberField(f, form)}
+              {f.type === "date" && DateField(f, form)}
+              {f.type === "boolean" && BooleanField(f, form)}
+              {f.style === "radio" && RadioField(f, form)}
+              {f.style === "select" && SelectField(f, form)}
+              {f.style === "combobox" && ComboboxField(f, form)}
+              {f.type === "file" && PhotoField(f, form)}
             </React.Fragment>
           ))}
           <Button onClick={() => form.getValues()}>Salvar</Button>
@@ -237,259 +223,264 @@ export function Preview({ id }: { id: any }) {
     </ToastProvider>
   </main>
   )
+}
 
-  //ComboboxField
-  function ComboboxField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <Card className="p-2">
-            <FormItem className="flex flex-col rounded-lg border p-4">
-              <FormLabel>{f.label}</FormLabel>
-              <FormDescription>{f.desc}</FormDescription>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button variant="outline" role="combobox" className={cn("w-80 justify-between", !field.value && "text-muted-foreground")}>
-                      {field.value
-                        ? f.enumValues?.find((item) => item.value === field.value)?.label
-                        : "Selecionar um item"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder={`Buscar ${f.enumName}...`} />
-                    <CommandEmpty>No {f.enumName} found.</CommandEmpty>
-                    <CommandGroup>
-                      <CommandList>
-                        {f.enumValues?.map((item) => (
-                          <CommandItem
-                            value={item.label}
-                            key={item.value} 
-                            onSelect={() => {
-                              form.setValue(f.key, item.value)
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                item.value === field.value ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {item.label}
-                          </CommandItem>
-                        ))}
-                      </CommandList>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          </Card>
-        )}
-      />
-    );
-  }
-  
-  function SelectField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{f.label}</FormLabel>
-            <FormDescription>{f.desc}</FormDescription>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {f.enumValues?.map((v) => (
-                  <SelectItem key={v.value} value={v.value}>  {/* Adicionando 'key' */}
-                    {v.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-  
-  function RadioField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel>{f.label}</FormLabel>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className="flex flex-col space-y-1"
-              >
-                {f.enumValues?.map((v) => (
-                  <FormItem key={v.value} className="flex items-center space-x-3 space-y-0">  {/* Adicionando 'key' */}
-                    <FormControl>
-                      <RadioGroupItem value={v.value} />
-                    </FormControl>
-                    <FormLabel className="font-normal">{v.label}</FormLabel>
-                  </FormItem>
-                ))}
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
+//ComboboxField
+function handleSelect(form: any, key: string, value: string) {
+  form.setValue(key, value);
+}
 
-  //BooleanField
-  function BooleanField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">{f.label}</FormLabel>
-              <FormDescription>{f.desc}</FormDescription>
-            </div>
-            <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-          </FormItem>
+function renderCommandItems(f: FF, form: any) {
+  return (f.enumValues ?? []).map((item) => (
+    <CommandItem
+      value={item.label}
+      key={item.value}
+      onSelect={() => handleSelect(form, f.key, item.value)}
+    >
+      <Check
+        className={cn(
+          "mr-2 h-4 w-4",
+          item.value === form.getValues(f.key) ? "opacity-100" : "opacity-0"
         )}
       />
-    )
-  }
+      {item.label}
+    </CommandItem>
+  ));
+}
 
-  //DateField
-  function DateField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
+function ComboboxField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <Card className="p-2">
           <FormItem className="flex flex-col rounded-lg border p-4">
             <FormLabel>{f.label}</FormLabel>
             <FormDescription>{f.desc}</FormDescription>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[240px] pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(new Date(field.value), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
-                    ) : (
-                      <span>Selecionar data</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  <Button variant="outline" role="combobox" className={cn("w-80 justify-between", !field.value && "text-muted-foreground")}>
+                    {field.value
+                      ? f.enumValues?.find((item) => item.value === field.value)?.label
+                      : "Selecionar um item"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  // disabled={(date) =>
-                  //   date > new Date() || date < new Date("1900-01-01")
-                  // }
-                  initialFocus
-                />
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder={`Buscar ${f.enumName}...`} />
+                  <CommandEmpty>No {f.enumName} found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandList>
+                      {renderCommandItems(f, form)}
+                    </CommandList>
+                  </CommandGroup>
+                </Command>
               </PopoverContent>
             </Popover>
             <FormMessage />
           </FormItem>
-        )}
-      />
-    );
-  }
+        </Card>
+      )}
+    />
+  );
+}
 
-  //NumberField
-  function NumberField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="rounded-lg border p-4">
-            <FormLabel>{f.label}</FormLabel>
-            <FormDescription>{f.desc}</FormDescription>
+function SelectField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{f.label}</FormLabel>
+          <FormDescription>{f.desc}</FormDescription>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
             <FormControl>
-              <Input type="number" placeholder={f.placeholder} {...field} max={Number(f.validation?.max)} min={Number(f.validation?.min)} />
+              <SelectTrigger>
+                <SelectValue placeholder="" />
+              </SelectTrigger>
             </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    )
-  }
+            <SelectContent>
+              {f.enumValues?.map((v) => (
+                <SelectItem key={v.value} value={v.value}>
+                  {v.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 
-  //StringField
-  function StringField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="rounded-lg border p-4">
-            <FormLabel>{f.label}</FormLabel>
+function RadioField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="space-y-3">
+          <FormLabel>{f.label}</FormLabel>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormControl>
+            <RadioGroup
+              onValueChange={field.onChange}
+              defaultValue={field.value}
+              className="flex flex-col space-y-1"
+            >
+              {f.enumValues?.map((v) => (
+                <FormItem key={v.value} className="flex items-center space-x-3 space-y-0">
+                  <FormControl>
+                    <RadioGroupItem value={v.value} />
+                  </FormControl>
+                  <FormLabel className="font-normal">{v.label}</FormLabel>
+                </FormItem>
+              ))}
+            </RadioGroup>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+//BooleanField
+function BooleanField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+          <div className="space-y-0.5">
+            <FormLabel className="text-base">{f.label}</FormLabel>
             <FormDescription>{f.desc}</FormDescription>
-            <FormControl>
-              {f.validation?.format === "email" ? (
-                <Input type="email" placeholder={f.placeholder} {...field} />
-              ) : (
+          </div>
+          <FormControl>
+            <Switch checked={field.value} onCheckedChange={field.onChange} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 
-                <Input placeholder={f.placeholder} {...field} max={Number(f.validation?.max)} min={Number(f.validation?.min)} maxLength={Number(f.validation?.max)} minLength={Number(f.validation?.min)}/>
-              )}
-            </FormControl>
-            
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    )
-  }
+//DateField
+function DateField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="flex flex-col rounded-lg border p-4">
+          <FormLabel>{f.label}</FormLabel>
+          <FormDescription>{f.desc}</FormDescription>
+          <Popover>
+            <PopoverTrigger asChild>
+              <FormControl>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] pl-3 text-left font-normal",
+                    !field.value && "text-muted-foreground"
+                  )}
+                >
+                  {field.value ? (
+                    format(new Date(field.value), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
+                  ) : (
+                    <span>Selecionar data</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={field.value}
+                onSelect={field.onChange}
+                // disabled={(date) =>
+                //   date > new Date() || date < new Date("1900-01-01")
+                // }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 
-  //PhotoField
-  function PhotoField(f: FF) {
-    return (
-       <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="rounded-lg border p-4">
-            <FormLabel>{f.label}</FormLabel>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormControl>
-              <Input type="file" id="picture" {...field}/>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
+//NumberField
+function NumberField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="rounded-lg border p-4">
+          <FormLabel>{f.label}</FormLabel>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormControl>
+            <Input type="number" placeholder={f.placeholder} {...field} max={Number(f.validation?.max)} min={Number(f.validation?.min)} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+//StringField
+function StringField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="rounded-lg border p-4">
+          <FormLabel>{f.label}</FormLabel>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormControl>
+            {f.validation?.format === "email" ? (
+              <Input type="email" placeholder={f.placeholder} {...field} />
+            ) : (
+              <Input placeholder={f.placeholder} {...field} max={Number(f.validation?.max)} min={Number(f.validation?.min)} maxLength={Number(f.validation?.max)} minLength={Number(f.validation?.min)}/>
+            )}
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+//PhotoField
+function PhotoField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="rounded-lg border p-4">
+          <FormLabel>{f.label}</FormLabel>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormControl>
+            <Input type="file" id="picture" {...field}/>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 }
