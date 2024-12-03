@@ -34,6 +34,74 @@ function cn(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+function handleSelect(form: any, key: string, value: string) {
+  form.setValue(key, value);
+}
+
+function renderCommandItems(f: FF, form: any) {
+  return (f.enumValues ?? []).map((item) => (
+    <CommandItem
+      value={item.label}
+      key={item.value}
+      onSelect={() => handleSelect(form, f.key, item.value)}
+    >
+      <Check
+        className={cn(
+          "mr-2 h-4 w-4",
+          item.value === form.getValues(f.key) ? "opacity-100" : "opacity-0"
+        )}
+      />
+      {item.label}
+    </CommandItem>
+  ));
+}
+
+function ComboboxField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="flex flex-col rounded-lg border p-4">
+          <FormLabel>
+            {f.label} {f.required && <span className="text-red-500">*</span>}
+          </FormLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <FormControl>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className={cn(
+                    "justify-between w-72 dark:bg-background dark:text-foreground",
+                    !field.value ? "text-muted-foreground" : ""
+                  )}
+                >
+                  {field.value
+                    ? f.enumValues?.find((item) => item.value === field.value)?.label
+                    : "Selecione..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="p-0">
+              <Command>
+                <CommandInput placeholder={`Buscar em ${f.enumName}...`} required={f.required} />
+                <CommandEmpty>Não encontrado</CommandEmpty>
+                <CommandGroup>
+                  <CommandList>{renderCommandItems(f, form)}</CommandList>
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
 export function Sender({ params }: { params: { id: any; asset: string; instance: string } }) {
   const { id, asset, instance } = params;
   const { forms, selectedForm } = useAppStateEditor(id);
@@ -233,272 +301,6 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     }
   }
 
-  function ComboboxField(f: FF) {
-    const handleSelect = (key: string, value: string) => {
-      form.setValue(key, value);
-    };
-
-    const renderCommandItems = () => {
-      return (f.enumValues ?? []).map((item) => (
-        <CommandItem
-          value={item.label}
-          key={item.value}
-          onSelect={() => handleSelect(f.key, item.value)}
-        >
-          <Check
-            className={cn(
-              "mr-2 h-4 w-4",
-              item.value === form.getValues(f.key) ? "opacity-100" : "opacity-0"
-            )}
-          />
-          {item.label}
-        </CommandItem>
-      ));
-    };
-
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="flex flex-col rounded-lg border p-4">
-            <FormLabel>
-              {f.label} {f.required && <span className="text-red-500">*</span>}
-            </FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className={cn(
-                      "justify-between w-72 dark:bg-background dark:text-foreground",
-                      !field.value ? "text-muted-foreground" : ""
-                    )}
-                  >
-                    {field.value
-                      ? f.enumValues?.find((item) => item.value === field.value)?.label
-                      : "Selecione..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="p-0">
-                <Command>
-                  <CommandInput placeholder={`Buscar em ${f.enumName}...`} required={f.required} />
-                  <CommandEmpty>Não encontrado</CommandEmpty>
-                  <CommandGroup>
-                    <CommandList>{renderCommandItems()}</CommandList>
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function SelectField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value} required={f.required}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder={f.placeholder} />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {f.enumValues?.map((v) => (
-                  <SelectItem key={v.value} value={v.value}>
-                    {v.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function RadioField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className={f.required ? "border-red-500 flex flex-col space-y-1" : "flex flex-col space-y-1"}
-                required={f.required}
-              >
-                {f.enumValues?.map((v) => (
-                  <div key={v.value} className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value={v.value} />
-                    </FormControl>
-                    <FormLabel className="font-normal">{v.label}</FormLabel>
-                  </div>
-                ))}
-              </RadioGroup>
-            </FormControl>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function BooleanField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="flex flex-col rounded-lg border p-4 w-full">
-            <FormLabel className="text-base justify-start">{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} required={f.required} />
-            </FormControl>
-            <FormDescription>{f.desc}</FormDescription>
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function DateField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="flex flex-col rounded-lg border p-4">
-            <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[240px] pl-3 text-left font-normal dark:bg-background dark:text-foreground",
-                      !field.value ? "text-muted-foreground" : ""
-                    )}
-                  >
-                    {field.value ? (
-                      format(field.value, "PPP")
-                    ) : (
-                      <span>{f.placeholder}</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  required={f.required}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function NumberField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="rounded-lg border p-4">
-            <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <FormControl>
-              <Input type="number" placeholder={f.placeholder} {...field} required={f.required} onChange={field.onChange} />
-            </FormControl>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function StringField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="rounded-lg border p-4">
-            <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <FormControl>
-              {f.validation?.format === "email" ? (
-                <Input
-                  type="email"
-                  placeholder={f.placeholder}
-                  {...field}
-                  required={!!f.required}
-                  onChange={field.onChange}
-                />
-              ) : (
-                <Input
-                  placeholder={f.placeholder}
-                  {...field}
-                  required={!!f.required}
-                  onChange={field.onChange}
-                />
-              )}
-            </FormControl>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
-  function PhotoField(f: FF) {
-    return (
-      <FormField
-        control={form.control}
-        name={f.key}
-        render={({ field }) => (
-          <FormItem className="flex flex-col rounded-lg border p-4">
-            <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
-            <FormControl>
-              <Input className="hover:cursor-pointer" type="file" id="picture" {...field} required={f.required} onChange={field.onChange} />
-            </FormControl>
-            <FormDescription>{f.desc}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
   return (
     <Form {...form}>
       <form
@@ -508,14 +310,14 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
       >
         {formFields.map((f) => (
           <React.Fragment key={f.key}>
-            {f.type === "string" && StringField(f)}
-            {f.type === "number" && NumberField(f)}
-            {f.type === "date" && DateField(f)}
-            {f.type === "boolean" && BooleanField(f)}
-            {f.style === "radio" && RadioField(f)}
-            {f.style === "select" && SelectField(f)}
-            {f.style === "combobox" && ComboboxField(f)}
-            {f.type === "file" && PhotoField(f)}
+            {f.type === "string" && StringField(f, form)}
+            {f.type === "number" && NumberField(f, form)}
+            {f.type === "date" && DateField(f, form)}
+            {f.type === "boolean" && BooleanField(f, form)}
+            {f.style === "radio" && RadioField(f, form)}
+            {f.style === "select" && SelectField(f, form)}
+            {f.style === "combobox" && ComboboxField(f, form)}
+            {f.type === "file" && PhotoField(f, form)}
           </React.Fragment>
         ))}
         {error && (
@@ -530,5 +332,203 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
       </form>
       <ToastContainer />
     </Form>
+  );
+}
+
+function SelectField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value} required={f.required}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder={f.placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {f.enumValues?.map((v) => (
+                <SelectItem key={v.value} value={v.value}>
+                  {v.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function RadioField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="space-y-3">
+          <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <FormControl>
+            <RadioGroup
+              onValueChange={field.onChange}
+              defaultValue={field.value}
+              className={f.required ? "border-red-500 flex flex-col space-y-1" : "flex flex-col space-y-1"}
+              required={f.required}
+            >
+              {f.enumValues?.map((v) => (
+                <div key={v.value} className="flex items-center space-x-3 space-y-0">
+                  <FormControl>
+                    <RadioGroupItem value={v.value} />
+                  </FormControl>
+                  <FormLabel className="font-normal">{v.label}</FormLabel>
+                </div>
+              ))}
+            </RadioGroup>
+          </FormControl>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function BooleanField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="flex flex-col rounded-lg border p-4 w-full">
+          <FormLabel className="text-base justify-start">{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <FormControl>
+            <Switch checked={field.value} onCheckedChange={field.onChange} required={f.required} />
+          </FormControl>
+          <FormDescription>{f.desc}</FormDescription>
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function DateField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="flex flex-col rounded-lg border p-4">
+          <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <FormControl>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] pl-3 text-left font-normal dark:bg-background dark:text-foreground",
+                    !field.value ? "text-muted-foreground" : ""
+                  )}
+                >
+                  {field.value ? (
+                    format(field.value, "PPP")
+                  ) : (
+                    <span>{f.placeholder}</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={field.value}
+                onSelect={field.onChange}
+                required={f.required}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function NumberField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="rounded-lg border p-4">
+          <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <FormControl>
+            <Input type="number" placeholder={f.placeholder} {...field} required={f.required} onChange={field.onChange} />
+          </FormControl>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function StringField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="rounded-lg border p-4">
+          <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <FormControl>
+            {f.validation?.format === "email" ? (
+              <Input
+                type="email"
+                placeholder={f.placeholder}
+                {...field}
+                required={!!f.required}
+                onChange={field.onChange}
+              />
+            ) : (
+              <Input
+                placeholder={f.placeholder}
+                {...field}
+                required={!!f.required}
+                onChange={field.onChange}
+              />
+            )}
+          </FormControl>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function PhotoField(f: FF, form: any) {
+  return (
+    <FormField
+      control={form.control}
+      name={f.key}
+      render={({ field }) => (
+        <FormItem className="flex flex-col rounded-lg border p-4">
+          <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
+          <FormControl>
+            <Input className="hover:cursor-pointer" type="file" id="picture" {...field} required={f.required} onChange={field.onChange} />
+          </FormControl>
+          <FormDescription>{f.desc}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }
