@@ -22,12 +22,9 @@ import {
   ToastDescription,
   ToastClose,
 } from '@/components/ui/toast'; // Ajuste o caminho de importação conforme necessário
-import { set } from 'date-fns';
 
-
-export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (value: boolean) => void, hasChanged: boolean}) {
+export default function SheetNew({ setHasChanged, hasChanged }: { setHasChanged: (value: boolean) => void, hasChanged: boolean }) {
   const [emailSuggestions, setEmailSuggestions] = useState<any | null>(null);
-
   const [NewProjectFormData, setNewProjectFormData] = useState({
     projectName: '',
     projectDescription: '',
@@ -36,7 +33,6 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     modified_at: '',
     created_at: '',
   });
-
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [value, setValue] = useState('');
   const [toastMessage, setToastMessage] = useState<{ title: string; description: string; variant: 'default' | 'destructive' } | null>(null);
@@ -45,9 +41,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
   useEffect(() => {
     try {
       api.get('/api/users/').then(response => setEmailSuggestions(response.data));
-    }
-  
-    catch (error) {
+    } catch (error) {
       console.error('Erro ao buscar sugestões de email:', error);
     }
   }, []);
@@ -55,7 +49,6 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
   const getSuggestions = (inputValue: string) => {
     const normalizedInput = inputValue.trim().toLowerCase();
     if (!normalizedInput) return [];
-    // Assume que emailSuggestions é um objeto com uma propriedade results que é um array
     const suggestionsArray = emailSuggestions || [];
     return suggestionsArray
       .filter((email: any) => email.email.toLowerCase().includes(normalizedInput))
@@ -83,7 +76,6 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
       return;
     }
 
-    // Verifica se emailSuggestions está vazio antes de usar map
     const suggestedEmails = emailSuggestions && emailSuggestions.length > 0 ? emailSuggestions.map((email: any) => email.email.toLowerCase()) : [];
 
     if (value && suggestedEmails.includes(value.toLowerCase())) {
@@ -124,35 +116,66 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
     }));
   };
 
+  const validateFormFields = (formData: any) => {
+    if (!formData.projectName || !formData.projectDescription) {
+      setToastMessage({ title: 'Erro', description: 'Nome e descrição do projeto são obrigatórios.', variant: 'destructive' });
+      return false;
+    }
+    return true;
+  };
+
+  const handleMemberAddition = (value: string) => {
+    if (!validateEmail(value)) {
+      setToastMessage({ title: 'Erro', description: 'Formato de email inválido.', variant: 'destructive' });
+      return false;
+    }
+    const suggestedEmails = emailSuggestions && emailSuggestions.length > 0 ? emailSuggestions.map((email: any) => email.email.toLowerCase()) : [];
+    if (value && suggestedEmails.includes(value.toLowerCase())) {
+      setNewProjectFormData((prev: any) => ({
+        ...prev,
+        members: [...prev.members, value]
+      }));
+      setValue('');
+      setSuggestions([]);
+      setToastMessage({ title: 'Sucesso', description: 'Membro adicionado com sucesso.', variant: 'default' });
+      return true;
+    } else {
+      setToastMessage({ title: 'Erro', description: 'Email não encontrado na lista de sugestões.', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const handleApiResponse = (response: any) => {
+    if (response.status === 201 || response.status === 200) {
+      setToastMessage({ title: 'Sucesso', description: 'Projeto criado com sucesso.', variant: 'default' });
+      setNewProjectFormData({
+        projectName: '',
+        projectDescription: '',
+        members: [],
+        image: null,
+        modified_at: '',
+        created_at: '',
+      });
+      setHasChanged(!hasChanged);
+      setIsSheetOpen(false);
+    } else {
+      const errorMessages: Record<number, string> = {
+        400: 'Erro ao criar o projeto.',
+        401: 'Você não tem permissão para criar um projeto.',
+        403: 'Você não tem permissão para criar um projeto.',
+        404: 'Erro ao criar o projeto.',
+        500: 'Erro ao criar o projeto.',
+      };
+      setToastMessage({ title: 'Erro', description: errorMessages[response.status] || 'Erro ao criar o projeto.', variant: 'destructive' });
+    }
+  };
+
   const handleAddProject = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Validação dos campos do formulário
-    if (!NewProjectFormData.projectName || !NewProjectFormData.projectDescription) {
-      setToastMessage({ title: 'Erro', description: 'Nome e descrição do projeto são obrigatórios.', variant: 'destructive' });
-      return;
-    }
+    if (!validateFormFields(NewProjectFormData)) return;
 
-    // Adiciona o membro atual (se houver) ao pressionar o botão "Adicionar Projeto"
-    if (value) {
-      if (!validateEmail(value)) {
-        setToastMessage({ title: 'Erro', description: 'Formato de email inválido.', variant: 'destructive' });
-        return;
-      }
-      const suggestedEmails = emailSuggestions && emailSuggestions.length > 0 ? emailSuggestions.map((email: any) => email.email.toLowerCase()) : [];
-      if (value && suggestedEmails.includes(value.toLowerCase())) {
-        setNewProjectFormData(prev => ({
-          ...prev,
-          members: [...prev.members, value]
-        }));
-        setValue('');
-        setSuggestions([]);
-        setToastMessage({ title: 'Sucesso', description: 'Membro adicionado com sucesso.', variant: 'default' });
-      } else {
-        setToastMessage({ title: 'Erro', description: 'Email não encontrado na lista de sugestões.', variant: 'destructive' });
-        return;
-      }
-    }
+    if (value && !handleMemberAddition(value)) return;
 
     try {
       const response = await api.post('/api/projects/', NewProjectFormData, {
@@ -160,30 +183,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
           'Content-Type': 'multipart/form-data',
         },
       });
-      
-      if (response.status === 201 || response.status === 200) {
-        setToastMessage({ title: 'Sucesso', description: 'Projeto criado com sucesso.', variant: 'default' });
-        setNewProjectFormData({
-          projectName: '',
-          projectDescription: '',
-          members: [],
-          image: null,
-          modified_at: '',
-          created_at: '',
-        });
-        setHasChanged(!hasChanged);
-        setIsSheetOpen(false); // Fechar o sheet após a criação bem-sucedida do projeto
-      } else if(response.status === 400) {
-        setToastMessage({ title: 'Erro', description: 'Erro ao criar o projeto.', variant: 'destructive' });
-      }else if(response.status === 401) {
-        setToastMessage({ title: 'Erro', description: 'Você não tem permissão para criar um projeto.', variant: 'destructive' });
-      }else if(response.status === 403) {
-        setToastMessage({ title: 'Erro', description: 'Você não tem permissão para criar um projeto.', variant: 'destructive' });
-      }else if(response.status === 404) {
-        setToastMessage({ title: 'Erro', description: 'Erro ao criar o projeto.', variant: 'destructive' });
-      }else if(response.status === 500) {
-        setToastMessage({ title: 'Erro', description: 'Erro ao criar o projeto.', variant: 'destructive' });
-      }
+      handleApiResponse(response);
     } catch (error) {
       console.error('Erro ao criar o projeto:', error);
       setToastMessage({ title: 'Erro', description: 'Erro ao criar o projeto.', variant: 'destructive' });
@@ -273,7 +273,7 @@ export default function SheetNew({setHasChanged, hasChanged}: {setHasChanged: (v
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="image" className="text-right text-blackdark:text-white">
+                <Label htmlFor="image" className="text-right text-black dark:text-white">
                   Imagem
                 </Label>
                 <Input
