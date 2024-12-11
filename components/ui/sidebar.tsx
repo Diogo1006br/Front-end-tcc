@@ -210,13 +210,6 @@ export function Sidebar() {
                 <User className='w-5 h-5 transition-all' />
                 Usuário
               </Link>
-              <Link href="/sistema/configuracoes" className='flex items-center gap-4 px2.5 text-muted-foreground hover:text-foreground'>
-                    <Settings className='w-5 h-5 transition-all' /> 
-                    Configurações
-                </Link>
-            </nav>
-            <nav className='flex flex-col items-center justify-center mt-auto mr-2 '>
-           
             </nav>
           </aside>
         </SheetContent>

@@ -29,7 +29,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-// Utility function to conditionally join class names
 function cn(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -107,6 +106,27 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
   const { forms, selectedForm } = useAppStateEditor(id);
   const [error, setError] = useState<string>();
   const [file, setFile] = useState<{ [key: string]: File }>({});
+  const [user, setUser] = useState({
+    id: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    companyPosition: "",
+    CPF: "",
+    phone: "",
+    birthDate: "",
+    profileImage: null as File | null,
+  });
+  const [userPostData, setUserPostData] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    companyPosition: "",
+    CPF: "",
+    phone: "",
+    birthDate: "",
+    profileImage: null as File | null,
+  });
 
   let formFields = forms[selectedForm].fields;
 
@@ -164,6 +184,38 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
   }, []);
 
   useEffect(() => {
+    try {
+      api.get('/api/users/').then(response => {
+        const userdale = response.data.filter((userD: any) => userD.id == 2)[0];
+
+        setUser({
+          id: userdale.id,
+          email: userdale.email,
+          firstName: userdale.firstName,
+          lastName: userdale.lastName,
+          CPF: userdale.CPF,
+          phone: userdale.phone,
+          birthDate: userdale.birthDate,
+          profileImage: null as File | null,
+          companyPosition: userdale.companyPosition
+        });
+        setUserPostData({
+          email: userdale.email,
+          firstName: userdale.firstName,
+          lastName: userdale.lastName,
+          CPF: userdale.CPF,
+          phone: userdale.phone,
+          birthDate: userdale.birthDate,
+          profileImage: null as File | null,
+          companyPosition: userdale.companyPosition
+        });
+      });
+    } catch (error) {
+      console.error('Erro ao buscar sugestões de email:', error);
+    }
+  }, []);
+
+  useEffect(() => {
     api.get("/api/form-responses/", {
       params: {
         formID: params.id,
@@ -198,66 +250,95 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
     return isValid;
   };
 
-  async function generatePDF(responseData: Record<string, any>, fileData: Record<string, File>) {
+  async function generatePDF(
+    responseData: Record<string, any>,
+    fileData: Record<string, File>,
+    company: string,
+    firstName: string,
+    lastName: string
+  ) {
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString();
-
-    doc.setFontSize(16);
-    doc.text("Relatório", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Data: ${date}`, 20, 30);
-
-    let y = 40;
-
-    Object.entries(responseData).forEach(([key, value]) => {
+    const fullName = `${firstName} ${lastName}`.trim();
+  
+    const addHeaderAndFooter = (doc: jsPDF, pageNumber: number, fullName: string, company: string) => {
+      doc.setFontSize(16);
+      doc.setLineWidth(0.5);
+      doc.rect(10, 10, 190, 25);
+  
+      doc.text("Relatório", 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Usuário: ${fullName}`, 20, 27);
+      doc.text(`Data: ${date}`, 20, 34);
+  
+      doc.rect(10, 280, 190, 15);
+      doc.setFontSize(10);
+      doc.text(`Empresa: ${company}`, 20, 290);
+      doc.text(`Página ${pageNumber}`, 180, 290);
+    };
+  
+    let y = 50;
+    let pageNumber = 1;
+  
+    addHeaderAndFooter(doc, pageNumber, fullName, company);
+  
+    // Loop de respostas textuais
+    for (const [key, value] of Object.entries(responseData)) {
+      const label = formFields.find((f) => f.key === key)?.label || key;
+      
+      // Se for um arquivo, não imprimir aqui, pois será tratado no loop de imagens
+      if (value instanceof File) {
+        continue;
+      }
+  
       if (y > 270) {
         doc.addPage();
-        y = 20;
+        y = 50;
+        pageNumber++;
+        addHeaderAndFooter(doc, pageNumber, fullName, company);
       }
-
+  
+      doc.setFontSize(12);
+      doc.text(`${label}: ${value}`, 20, y);
+      y += 10;
+    }
+  
+    // Loop para arquivos (imagens)
+    for (const [key, file] of Object.entries(fileData)) {
       const label = formFields.find((f) => f.key === key)?.label || key;
-
-      if (typeof value === "string" && value.startsWith("http")) {
-        const img = new Image();
-        img.src = value;
-        doc.text(`${label}:`, 20, y);
-        y += 10;
-        doc.addImage(img, "PNG", 20, y, 50, 50);
-        y += 60;
-      } else {
-        doc.text(`${label}: ${value}`, 20, y);
-        y += 10;
+  
+      if (y > 220) {
+        doc.addPage();
+        y = 50;
+        pageNumber++;
+        addHeaderAndFooter(doc, pageNumber, fullName, company);
       }
-    });
-
-    Object.entries(fileData).forEach(([key, file]) => {
-      const label = formFields.find((f) => f.key === key)?.label || key;
-
-      const reader = new FileReader();
-      reader.onload = function (e: ProgressEvent<FileReader>) {
-        const image = e.target?.result as string;
-
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-
-        doc.text(`${label}:`, 20, y);
-        y += 10;
-        doc.addImage(image, "PNG", 20, y, 50, 50);
-        y += 60;
-        doc.save(`Relatorio_${date}.pdf`);
-      };
-
-      reader.readAsDataURL(file);
-    });
-
+  
+      // Apenas o label sem valor texto, pois a imagem será adicionada em seguida
+      doc.text(`${label}:`, 20, y);
+      y += 10;
+  
+      const imageDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e: ProgressEvent<FileReader>) {
+          const image = e.target?.result as string;
+          resolve(image);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+  
+      const format = file.type === "image/png" ? "PNG" : "JPEG";
+      doc.addImage(imageDataUrl, format, 20, y, 50, 50);
+      y += 60;
+    }
+  
     doc.save(`Relatorio_${date}.pdf`);
   }
-
+  
   async function onSubmit() {
     const fields = formFields;
-
+  
     if (validateForm(fields)) {
       const values = {
         formID: id,
@@ -265,13 +346,13 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
         object_id: asset,
         response_type: instance,
       };
-
+  
       try {
         const response = await api.post(`/api/form-responses/`, values);
-
+  
         if (response.status === 200) {
           toast.success("Resposta enviada com sucesso.");
-
+  
           const updatedFormResponse = await api.get("/api/form-responses/", {
             params: {
               formID: params.id,
@@ -279,16 +360,21 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
               content_type: params.instance,
             },
           });
-
+  
           const updatedResponses = updatedFormResponse.data?.response || {};
-
+  
           if (Object.keys(updatedResponses).length > 0) {
             Object.entries(updatedResponses).forEach(([key, value]) => {
               form.setValue(key, value);
             });
           }
-
-          generatePDF(values.response, file);
+  
+          const company = "Minha Empresa";
+          // Agora usando os nomes do user
+          const firstName = user.firstName;
+          const lastName = user.lastName;
+          
+          await generatePDF(values.response, file, company, firstName, lastName);
         } else {
           toast.error("Erro ao enviar resposta.");
         }
@@ -317,7 +403,7 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
             {f.style === "radio" && RadioField(f, form)}
             {f.style === "select" && SelectField(f, form)}
             {f.style === "combobox" && ComboboxField(f, form)}
-            {f.type === "file" && PhotoField(f, form)}
+            {f.type === "file" && PhotoField(f, form, setFile)}
           </React.Fragment>
         ))}
         {error && (
@@ -326,7 +412,7 @@ export function Sender({ params }: { params: { id: any; asset: string; instance:
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Button className="dark:bg-background dark:text-foreground" onClick={() => form.getValues()}>
+        <Button className="dark:bg-background dark:text-foreground">
           Salvar
         </Button>
       </form>
@@ -514,7 +600,7 @@ function StringField(f: FF, form: any) {
   );
 }
 
-function PhotoField(f: FF, form: any) {
+function PhotoField(f: FF, form: any, setFile: React.Dispatch<React.SetStateAction<{[key:string]:File}>>) {
   return (
     <FormField
       control={form.control}
@@ -523,7 +609,20 @@ function PhotoField(f: FF, form: any) {
         <FormItem className="flex flex-col rounded-lg border p-4">
           <FormLabel>{f.label}{f.required && <span className="text-red-500">*</span>}</FormLabel>
           <FormControl>
-            <Input className="hover:cursor-pointer" type="file" id="picture" {...field} required={f.required} onChange={field.onChange} />
+            <Input
+              className="hover:cursor-pointer"
+              type="file"
+              id="picture"
+              required={f.required}
+              accept="image/png, image/jpeg"
+              onChange={(e) => {
+                const selectedFile = e.target.files?.[0];
+                if (selectedFile) {
+                  form.setValue(f.key, selectedFile);
+                  setFile(prev => ({ ...prev, [f.key]: selectedFile }));
+                }
+              }}
+            />
           </FormControl>
           <FormDescription>{f.desc}</FormDescription>
           <FormMessage />
